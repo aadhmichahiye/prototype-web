@@ -1,11 +1,12 @@
 <template>
-  <div>
-    Aadhmichahiye 
-    <Footer/>
-  </div>
+  <!-- <Sidebar/> -->
+  <router-view />
 </template>
 
 <script setup>
-import Footer from './components/Footer.vue';
+import Sidebar from "./layouts/Sidebar.vue";
 </script>
-<style scoped></style>
+
+<style>
+/* global styles can go here */
+</style>
