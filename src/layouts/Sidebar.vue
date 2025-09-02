@@ -69,14 +69,14 @@
           <router-link to="/client/list" class="nav-link" type="button">
             <button class="nav-item" type="button">
               <i class="ri-briefcase-line nav-icon"></i>
-              <span class="nav-label">Client List</span>
+              <span class="nav-label">Client visit contractor List</span>
             </button>
           </router-link>
 
           <router-link to="/contractor/list" class="nav-link" type="button">
             <button class="nav-item" type="button">
               <i class="ri-briefcase-line nav-icon"></i>
-              <span class="nav-label">Contractor List</span>
+              <span class="nav-label">Contractor visit client List</span>
             </button>
           </router-link>
 

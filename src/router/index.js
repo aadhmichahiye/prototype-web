@@ -4,6 +4,7 @@ import ContractorJobList from "../components/ContractorJobList.vue";
 import ClientJobListing from "../components/ClientJobListing.vue";
 import ClientPostJob from "../components/ClientPostJob.vue";
 import Settings from "../components/Settings.vue";
+import ContractorPostDetails from "../components/ContractorPostDetails.vue";
 // import Home from "@/views/Home.vue";
 // import MyJobs from "@/views/MyJobs.vue";
 // import PostJob from "@/views/PostJob.vue";
@@ -23,6 +24,7 @@ const routes = [
       { path: "my-posts", component: ClientJobListing },
       { path: "create-post", component: ClientPostJob },
       { path: "settings", component: Settings },
+      { path: "contractor/post-details", component: ContractorPostDetails },
       //   { path: "my-jobs", component: MyJobs },
       //   { path: "post-job", component: PostJob },
       //   { path: "settings", component: Settings },
