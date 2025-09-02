@@ -52,25 +52,47 @@
         </div>
 
         <nav class="nav-menu">
-          <button class="nav-item" type="button">
-            <i class="ri-dashboard-line"></i>
-            <span class="nav-label">Dashboard</span>
-          </button>
+          <router-link to="/dashboard" class="nav-link" type="button">
+            <button class="nav-item" type="button">
+              <i class="ri-dashboard-line"></i>
+              <span class="nav-label">Dashboard</span>
+            </button>
+          </router-link>
 
-          <button class="nav-item" type="button">
-            <i class="ri-briefcase-line nav-icon"></i>
-            <span class="nav-label">My Jobs</span>
-          </button>
+          <router-link to="/my-posts" class="nav-link" type="button">
+            <button class="nav-item" type="button">
+              <i class="ri-briefcase-line nav-icon"></i>
+              <span class="nav-label">My Posts</span>
+            </button>
+          </router-link>
 
-          <button class="nav-item" type="button">
-            <i class="ri-add-circle-line nav-icon"></i>
-            <span class="nav-label">Post Job</span>
-          </button>
+          <router-link to="/client/list" class="nav-link" type="button">
+            <button class="nav-item" type="button">
+              <i class="ri-briefcase-line nav-icon"></i>
+              <span class="nav-label">Client List</span>
+            </button>
+          </router-link>
 
-          <button class="nav-item" type="button">
-            <i class="ri-settings-3-line nav-icon"></i>
-            <span class="nav-label">Settings</span>
-          </button>
+          <router-link to="/contractor/list" class="nav-link" type="button">
+            <button class="nav-item" type="button">
+              <i class="ri-briefcase-line nav-icon"></i>
+              <span class="nav-label">Contractor List</span>
+            </button>
+          </router-link>
+
+          <router-link to="/create-post" class="nav-link" type="button">
+            <button class="nav-item" type="button">
+              <i class="ri-add-circle-line nav-icon"></i>
+              <span class="nav-label">Create Post</span>
+            </button>
+          </router-link>
+
+          <router-link to="/settings" class="nav-link" type="button">
+            <button class="nav-item" type="button">
+              <i class="ri-settings-3-line nav-icon"></i>
+              <span class="nav-label">Settings</span>
+            </button>
+          </router-link>
 
           <div class="bottom-spacer"></div>
 
@@ -227,6 +249,19 @@ watch(
   gap: 6px;
   flex: 1;
 }
+.nav-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+.nav-link.router-link-active .nav-item {
+  background: #f0f0f0; /* active highlight */
+  font-weight: 500;
+}
+.nav-link.router-link-exact-active .nav-item {
+  background: #e5e5e5; /* exact route highlight */
+}
+
 .nav-item {
   display: flex;
   align-items: center;
