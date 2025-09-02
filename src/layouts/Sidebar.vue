@@ -52,12 +52,12 @@
         </div>
 
         <nav class="nav-menu">
-          <router-link to="/dashboard" class="nav-link" type="button">
+          <!-- <router-link to="/dashboard" class="nav-link" type="button">
             <button class="nav-item" type="button">
               <i class="ri-dashboard-line"></i>
               <span class="nav-label">Dashboard</span>
             </button>
-          </router-link>
+          </router-link> -->
 
           <router-link to="/my-posts" class="nav-link" type="button">
             <button class="nav-item" type="button">
