@@ -5,15 +5,20 @@ import ClientJobListing from "../components/ClientJobListing.vue";
 import ClientPostJob from "../components/ClientPostJob.vue";
 import Settings from "../components/Settings.vue";
 import ContractorPostDetails from "../components/ContractorPostDetails.vue";
-// import Home from "@/views/Home.vue";
-// import MyJobs from "@/views/MyJobs.vue";
-// import PostJob from "@/views/PostJob.vue";
-// import Settings from "@/views/Settings.vue";
-// import Login from "@/views/Login.vue";
-
+import Login from "../views/Login.vue";
+import Register from "../views/Register.vue";
 const routes = [
   //   { path: "/login", component: Login }, // auth without sidebar
-
+  {
+    path: "/login",
+    name: "Login",
+    component: Login, // 👈 standalone, no MainLayout
+  },
+  {
+    path: "/register",
+    name: "Register",
+    component: Register, // 👈 standalone, no MainLayout
+  },
   {
     path: "/",
     component: MainLayout,
@@ -25,9 +30,6 @@ const routes = [
       { path: "create-post", component: ClientPostJob },
       { path: "settings", component: Settings },
       { path: "contractor/post-details", component: ContractorPostDetails },
-      //   { path: "my-jobs", component: MyJobs },
-      //   { path: "post-job", component: PostJob },
-      //   { path: "settings", component: Settings },
     ],
   },
 ];

@@ -132,7 +132,7 @@ watch(
 );
 </script>
 
-<style scoped>
+<style>
 /* Toggle / hamburger */
 .hamburger {
   position: fixed;
@@ -195,7 +195,7 @@ watch(
   top: 0;
   left: 0;
   height: 100vh;
-  background: var(--sidebar-bg);
+  background: #bdbdbdd1;
   border-right: 1px solid var(--sidebar-border);
   z-index: 1350;
   display: flex;

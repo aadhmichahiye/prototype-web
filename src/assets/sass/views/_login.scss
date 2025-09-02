@@ -1,0 +1,27 @@
+.login-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 32px);
+  .login-card {
+    width: 100%;
+    max-width: 420px;
+    border-radius: $radius;
+    padding: 28px;
+    border: 1px solid $border;
+    .title {
+      color: $primary;
+      font-weight: 700;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .login-btn {
+      width: 100%;
+      background: $primary;
+      color: $white;
+      border-radius: 10px;
+      padding: 12px;
+    }
+  }
+}
