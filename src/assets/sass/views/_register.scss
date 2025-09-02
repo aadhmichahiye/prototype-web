@@ -1,0 +1,8 @@
+
+.signup-page {
+  display:flex; justify-content:center; align-items:center; min-height: calc(100vh - 32px);
+  .signup-card { width:100%; max-width:460px; padding: 26px; border-radius:$radius; border: 1px solid $border;
+    .title { color: $primary; font-weight:700; }
+    .signup-btn { width:100%; background:$primary; color:$white; border-radius:10px; padding:12px; }
+  }
+}

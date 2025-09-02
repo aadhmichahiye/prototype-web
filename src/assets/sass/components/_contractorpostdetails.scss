@@ -1,0 +1,15 @@
+@import "../abstracts/_variables";
+
+.contractor-post-detail {
+  padding: 40px 18px;
+  .contractor-card {
+    border: 1px solid $border; border-radius: $radius; padding:20px; background: #fff;
+    .card-header { display:flex; justify-content:space-between; gap:10px; align-items:flex-start; }
+    .label { color: $text-muted; font-size: 0.85rem; margin-bottom: 6px; }
+    .value { font-weight:700; color: $text-dark; }
+    .worker-section { margin-top: 12px; .workers-table { border-radius: 8px; overflow:hidden; } }
+  }
+}
+@include respond-max(md) {
+  .contractor-post-detail { padding: 24px; .card-header { flex-direction: column; } }
+}

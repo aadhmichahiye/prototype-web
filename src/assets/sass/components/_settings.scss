@@ -1,0 +1,25 @@
+@import "../abstracts/_variables";
+
+.settings-page {
+  padding: 40px 18px;
+  max-width: 680px;
+  margin: 0 auto;
+  .page-heading {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: $text-dark;
+  }
+  .settings-form {
+    background: transparent;
+    .save-btn {
+      width: 100%;
+      background: $primary;
+      color: $white;
+      border-radius: 10px;
+      padding: 12px;
+    }
+  }
+}

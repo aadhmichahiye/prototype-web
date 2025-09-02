@@ -1,0 +1,17 @@
+@import "../abstracts/_variables";
+
+.main-layout {
+  .content {
+    transition: margin-left 280ms cubic-bezier(.2,.8,.2,1), width 280ms ease;
+    margin-left: var(--sidebar-width-collapsed);
+    width: calc(100% - var(--sidebar-width-collapsed));
+  }
+  .content.expanded {
+    margin-left: var(--sidebar-width-expanded);
+    width: calc(100% - var(--sidebar-width-expanded));
+  }
+
+  @include respond-max(md) {
+    .content, .content.expanded { margin-left: 0; width: 100%; }
+  }
+}
