@@ -59,31 +59,53 @@
             </button>
           </router-link> -->
 
-          <router-link to="/my-posts" class="nav-link" type="button">
+          <router-link to="/client-posts/list" class="nav-link" type="button">
             <button class="nav-item" type="button">
-              <i class="ri-briefcase-line nav-icon"></i>
-              <span class="nav-label">My Posts</span>
+              <i class="ri-briefcase-4-line nav-icon"></i>
+              <span class="nav-label">Client Posts</span>
             </button>
           </router-link>
 
-          <router-link to="/client/list" class="nav-link" type="button">
+          <router-link
+            to="/contractor-posts/list"
+            class="nav-link"
+            type="button"
+          >
+            <button class="nav-item" type="button">
+              <i class="ri-briefcase-4-line nav-icon"></i>
+              <span class="nav-label">Contractor Posts</span>
+            </button>
+          </router-link>
+
+          <!-- <router-link to="/client/list" class="nav-link" type="button">
             <button class="nav-item" type="button">
               <i class="ri-briefcase-line nav-icon"></i>
               <span class="nav-label">Client visit contractor List</span>
             </button>
-          </router-link>
+          </router-link> -->
 
-          <router-link to="/contractor/list" class="nav-link" type="button">
+          <!-- <router-link to="/contractor/list" class="nav-link" type="button">
             <button class="nav-item" type="button">
               <i class="ri-briefcase-line nav-icon"></i>
               <span class="nav-label">Contractor visit client List</span>
             </button>
-          </router-link>
+          </router-link> -->
 
-          <router-link to="/create-post" class="nav-link" type="button">
+          <router-link to="/client-posts/create" class="nav-link" type="button">
             <button class="nav-item" type="button">
               <i class="ri-add-circle-line nav-icon"></i>
-              <span class="nav-label">Create Post</span>
+              <span class="nav-label">Create client Post</span>
+            </button>
+          </router-link>
+
+          <router-link
+            to="/contractor-posts/create"
+            class="nav-link"
+            type="button"
+          >
+            <button class="nav-item" type="button">
+              <i class="ri-add-circle-line nav-icon"></i>
+              <span class="nav-label">Create contractor Post</span>
             </button>
           </router-link>
 

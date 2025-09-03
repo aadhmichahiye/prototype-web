@@ -1,0 +1,93 @@
+.contractor-post-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  padding: 20px;
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  @media (min-width: 1200px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.contractor-post-card {
+  border: 1px solid $border;
+  border-radius: $radius;
+  padding: 20px;
+  background: $white;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  transition: transform $transition, box-shadow $transition;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+
+    .contractor-name {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: $text-dark;
+      margin-bottom: 4px;
+    }
+    .city,
+    .location,
+    .pincode {
+      font-size: 0.9rem;
+      color: $text-muted;
+      margin: 2px 0;
+    }
+    .status {
+      font-size: 0.9rem;
+      font-weight: 700;
+      &.open {
+        color: #16a34a;
+      }
+      &.closed {
+        color: #dc2626;
+      }
+    }
+  }
+
+  .workers {
+    .label {
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: $text-dark;
+    }
+    ul {
+      padding-left: 16px;
+      li {
+        font-size: 0.9rem;
+        color: $text-muted;
+      }
+    }
+  }
+
+  .footer {
+    margin-top: auto;
+    display: flex;
+    justify-content: flex-end;
+
+    .contact-btn {
+      background: $primary;
+      border: none;
+      border-radius: $radius;
+      font-weight: 600;
+      padding: 6px 14px;
+      &:hover {
+        background: $primary-dark;
+      }
+    }
+  }
+}

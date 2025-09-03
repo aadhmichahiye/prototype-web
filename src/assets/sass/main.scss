@@ -1,4 +1,4 @@
-// @import "abstracts/variables";
+@import "abstracts/variables";
 @import "abstracts/mixins";
 
 @import "base/base";
@@ -10,6 +10,10 @@
 // @import "components/contractorcreatepost";
 // @import "components/contractorjoblist";
 // @import "components/contractorpostdetails";
+@import "components/listofclientposts";
+@import "components/listofcontractorposts";
+@import "components/clientpostscreate";
+@import "components/contractorpostscreate";
 
 // @import "components/settings";
 // @import "views/login";

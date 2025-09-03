@@ -159,6 +159,7 @@
   transition: opacity 0.36s ease, transform 0.36s ease;
   transform-origin: left center;
   white-space: nowrap;
+  font-size: var(--font-size-sm);
 }
 
 /* Collapsed state */

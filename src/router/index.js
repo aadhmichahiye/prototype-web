@@ -1,12 +1,13 @@
 import { createRouter, createWebHistory } from "vue-router";
 import MainLayout from "../layouts/MainLayout.vue";
-import ContractorJobList from "../components/ContractorJobList.vue";
-import ClientJobListing from "../components/ClientJobListing.vue";
-import ClientPostJob from "../components/ClientPostJob.vue";
 import Settings from "../components/Settings.vue";
-import ContractorPostDetails from "../components/ContractorPostDetails.vue";
 import Login from "../views/Login.vue";
 import Register from "../views/Register.vue";
+import ListOfClientPost from "../components/ListOfClientPost.vue";
+import ListOfContractorPost from "../components/ListOfContractorPost.vue";
+import ClientPostsCreate from "../components/ClientPostsCreate.vue";
+import ContractorPostsCreate from "../components/ContractorPostsCreate.vue";
+import component from "element-plus/es/components/tree-select/src/tree-select-option.mjs";
 const routes = [
   //   { path: "/login", component: Login }, // auth without sidebar
   {
@@ -23,13 +24,21 @@ const routes = [
     path: "/",
     component: MainLayout,
     children: [
-      { path: "", redirect: "/contractor/list" },
-      { path: "contractor/list", component: ContractorJobList },
-      { path: "client/list", component: ClientJobListing },
-      { path: "my-posts", component: ClientJobListing },
-      { path: "create-post", component: ClientPostJob },
+      { path: "", redirect: "/contractor-posts/list" },
+      { path: "client-posts/create", component: ClientPostsCreate },
+      {
+        path: "contractor-posts/create",
+        component: ContractorPostsCreate,
+      },
       { path: "settings", component: Settings },
-      { path: "contractor/post-details", component: ContractorPostDetails },
+      {
+        path: "client-posts/list",
+        component: ListOfClientPost,
+      },
+      {
+        path: "contractor-posts/list",
+        component: ListOfContractorPost,
+      },
     ],
   },
 ];
