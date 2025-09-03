@@ -5,6 +5,10 @@
   max-width: 1000px;
   margin: 0 auto;
 
+  @media (max-width: 768px) {
+    padding: 5rem 1rem;
+  }
+
   .contractor-form {
     display: flex;
     flex-direction: column;
