@@ -1,3 +1,5 @@
+@import "../abstracts/variables";
+
 *,
 *::after,
 *::before {
@@ -6,10 +8,34 @@
   box-sizing: inherit;
 }
 
+body,
+html {
+  font-family: $font-family-base;
+  font-weight: $font-weight-regular;
+  color: var(--text-dark);
+  line-height: 1.5;
+}
+
 :root {
-  --sidebar-width-expanded: 260px;
-  --sidebar-width-collapsed: 72px;
-  --sidebar-bg: #ffffff;
-  --sidebar-border: #e6e6e6;
-  --primary: #1976d2;
+  --primary: #{$primary};
+  --primary-dark: #{$primary-dark};
+  --white: #{$white};
+  --text-dark: #{$text-dark};
+  --text-muted: #{$text-muted};
+  --muted-bg: #{$muted-bg};
+  --border: #{$border};
+
+  --radius: #{$radius};
+  --gap-sm: #{$gap-sm};
+  --gap: #{$gap};
+  --gap-lg: #{$gap-lg};
+  --transition: #{$transition};
+
+  --sidebar-width-expanded: #{$sidebar-width-expanded};
+  --sidebar-width-collapsed: #{$sidebar-width-collapsed};
+
+  --font-weight-regular: #{$font-weight-regular};
+  --font-weight-medium: #{$font-weight-medium};
+  --font-weight-semibold: #{$font-weight-semibold};
+  --font-weight-bold: #{$font-weight-bold};
 }

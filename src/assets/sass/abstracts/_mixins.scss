@@ -2,12 +2,29 @@
   @return #{$px/16}rem;
 }
 
+@mixin flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@mixin flex-center-vertical {
+  display: flex;
+  align-items: center;
+}
+
 @mixin respond-max($break) {
   @if $break == sm {
-    @media (max-width: 576px) { @content; }
+    @media (max-width: 576px) {
+      @content;
+    }
   } @else if $break == md {
-    @media (max-width: 768px) { @content; }
+    @media (max-width: 768px) {
+      @content;
+    }
   } @else if $break == lg {
-    @media (max-width: 1024px) { @content; }
+    @media (max-width: 1024px) {
+      @content;
+    }
   }
 }
