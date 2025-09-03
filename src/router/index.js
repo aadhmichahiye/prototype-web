@@ -7,7 +7,9 @@ import ListOfClientPost from "../components/ListOfClientPost.vue";
 import ListOfContractorPost from "../components/ListOfContractorPost.vue";
 import ClientPostsCreate from "../components/ClientPostsCreate.vue";
 import ContractorPostsCreate from "../components/ContractorPostsCreate.vue";
-import component from "element-plus/es/components/tree-select/src/tree-select-option.mjs";
+import ClientPostDetails from "../components/ClientPostDetails.vue";
+import ContractorPostsDetails from "../components/ContractorPostsDetails.vue";
+import TermsAndConditions from "../views/TermsAndConditions.vue";
 const routes = [
   //   { path: "/login", component: Login }, // auth without sidebar
   {
@@ -19,6 +21,11 @@ const routes = [
     path: "/register",
     name: "Register",
     component: Register, // 👈 standalone, no MainLayout
+  },
+  {
+    path: "/terms",
+    name: "terms",
+    component: TermsAndConditions, // 👈 standalone, no MainLayout
   },
   {
     path: "/",
@@ -38,6 +45,16 @@ const routes = [
       {
         path: "contractor-posts/list",
         component: ListOfContractorPost,
+      },
+      {
+        path: "client-posts/details/:id",
+        name: "ClientPostDetails",
+        component: ClientPostDetails,
+      },
+      {
+        path: "contractor-posts/details/:id",
+        name: "ContractorPostsDetails",
+        component: ContractorPostsDetails,
       },
     ],
   },

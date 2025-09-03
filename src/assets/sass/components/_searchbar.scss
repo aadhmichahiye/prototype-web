@@ -1,0 +1,42 @@
+@import "../abstracts/_variables";
+
+.search-bar {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 1rem;
+
+  .search-input {
+    max-width: 600px;
+    width: 100%;
+
+    .el-input__wrapper {
+      border-radius: 9999px; // pill shape
+      border: 1px solid $border;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      transition: border 0.2s ease, box-shadow 0.2s ease;
+
+      &:focus-within {
+        border-color: $primary;
+        box-shadow: 0 0 0 3px rgba($primary, 0.2);
+      }
+    }
+
+    .search-icon {
+      font-size: 1.2rem;
+      color: $text-muted;
+    }
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .search-bar {
+    padding: 0.85rem 10% 0.1rem 17%;
+    width: 80%;
+    .search-input {
+      max-width: 100%;
+    }
+  }
+}

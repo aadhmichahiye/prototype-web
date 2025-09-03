@@ -1,4 +1,5 @@
 <template>
+  <SearchBar />
   <div class="contractor-post-list">
     <div
       v-for="post in contractorPosts"
@@ -30,8 +31,13 @@
 
       <!-- Footer -->
       <div class="footer">
-        <el-button type="primary" size="small" class="contact-btn">
-          Contact Client
+        <el-button
+          type="primary"
+          size="small"
+          class="contact-btn"
+          @click="handleViewDetails"
+        >
+          Contact Contractor
         </el-button>
       </div>
     </div>
@@ -143,4 +149,14 @@ const contractorPosts = [
     workers: [{ type: "Plumber", count: 10 }],
   },
 ];
+
+import { useRouter } from "vue-router";
+import Sidebar from "../layouts/Sidebar.vue";
+import SearchBar from "./SearchBar.vue";
+
+const router = useRouter();
+
+const handleViewDetails = () => {
+  router.push("/contractor-posts/details/id");
+};
 </script>

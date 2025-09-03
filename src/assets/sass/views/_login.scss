@@ -1,27 +1,90 @@
+@import "../abstracts/_variables";
+
 .login-page {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: calc(100vh - 32px);
-  .login-card {
-    width: 100%;
-    max-width: 420px;
-    border-radius: $radius;
-    padding: 28px;
-    border: 1px solid $border;
-    .title {
-      color: $primary;
-      font-weight: 700;
-      display: flex;
-      gap: 8px;
-      align-items: center;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 100vh;
+
+  .illustration {
+    background: #fff6f2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+
+    .hero-svg {
+      max-width: 400px;
+      width: 100%;
     }
+  }
+
+  .form-section {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 3rem;
+    background: $white;
+
+    .title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: $primary;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      font-size: 1rem;
+      color: $text-muted;
+      margin-bottom: 2rem;
+    }
+
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+
     .login-btn {
       width: 100%;
+      font-weight: 600;
       background: $primary;
-      color: $white;
-      border-radius: 10px;
-      padding: 12px;
+      border: none;
+      border-radius: $radius;
+      padding: 0.8rem;
+      &:hover {
+        background: $primary-dark;
+      }
+    }
+
+    .register-redirect {
+      margin-top: 1rem;
+      text-align: center;
+      font-size: 0.95rem;
+      color: $text-muted;
+
+      .register-link {
+        margin-left: 0.25rem;
+        color: $primary;
+        font-weight: 600;
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr;
+
+    .illustration {
+      display: none;
+    }
+
+    .form-section {
+      padding: 2rem 1.5rem;
     }
   }
 }

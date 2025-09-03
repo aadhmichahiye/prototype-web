@@ -1,0 +1,103 @@
+@import "../abstracts/_variables";
+
+.client-post-detail {
+  padding: 5rem 1rem;
+
+  .client-card {
+    border: 1px solid $border;
+    border-radius: $radius;
+    padding: 1.5rem;
+    background: $white;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+
+    .label {
+      font-size: 0.8rem;
+      color: $text-muted;
+      margin-bottom: 0.25rem;
+    }
+
+    .value {
+      font-size: 1rem;
+      font-weight: 600;
+      color: $text-dark;
+    }
+
+    .description {
+      font-size: 0.95rem;
+      color: $text-dark;
+    }
+
+    .status {
+      font-weight: 600;
+      &.open { color: #16a34a; }
+      &.closed { color: #dc2626; }
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .card-section {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .location-info {
+      .info-row {
+        margin-bottom: 1rem;
+
+        .location {
+          display: flex;
+          align-items: center;
+          gap: 0.4rem;
+          font-size: 0.95rem;
+          color: $text-dark;
+        }
+      }
+    }
+
+    .worker-section {
+      .workers-table {
+        border-radius: 0.5rem;
+        overflow: hidden;
+      }
+    }
+
+    .footer {
+      margin-top: 1rem;
+      display: flex;
+      justify-content: flex-end;
+
+      .contact-btn {
+        background: $primary;
+        border: none;
+        border-radius: $radius;
+        font-weight: 600;
+        padding: 0.6rem 1.2rem;
+        &:hover {
+          background: $primary-dark;
+        }
+      }
+    }
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .client-card {
+    padding: 1rem;
+  }
+
+  .card-header {
+    flex-direction: column;
+    align-items: flex-start !important;
+  }
+}

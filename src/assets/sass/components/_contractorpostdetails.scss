@@ -1,0 +1,136 @@
+@import "../abstracts/_variables";
+
+.contractor-post-detail {
+  padding: 5rem 1rem;
+
+  .contractor-card {
+    border: 1px solid $border;
+    border-radius: $radius;
+    padding: 2rem;
+    background: $white;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+
+      .contractor-name {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: $text-dark;
+      }
+
+      .status {
+        font-size: 0.9rem;
+        font-weight: 600;
+        padding: 0.3rem 0.8rem;
+        border-radius: $radius;
+        text-transform: capitalize;
+        &.open {
+          background: #e6f9ec;
+          color: #16a34a;
+        }
+        &.closed {
+          background: #fde8e8;
+          color: #dc2626;
+        }
+      }
+    }
+
+    .contact-info {
+      .label {
+        font-size: 0.85rem;
+        color: $text-muted;
+        margin-bottom: 0.2rem;
+      }
+      .phone {
+        font-size: 1rem;
+        font-weight: 600;
+        color: $primary;
+        text-decoration: none;
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+
+    .location-info {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+
+      .info-row {
+        display: flex;
+        flex-direction: column;
+        .label {
+          font-size: 0.85rem;
+          color: $text-muted;
+        }
+        .value {
+          font-size: 1rem;
+          font-weight: 600;
+          color: $text-dark;
+        }
+      }
+    }
+
+    .worker-section {
+      .label {
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: $text-dark;
+      }
+
+      .workers-table {
+        border-radius: 0.5rem;
+        overflow: hidden;
+      }
+
+      .worker-status {
+        font-weight: 600;
+        &.open {
+          color: #16a34a;
+        }
+        &.closed {
+          color: #dc2626;
+        }
+      }
+    }
+
+    .footer {
+      margin-top: 1rem;
+      display: flex;
+      justify-content: flex-end;
+
+      .call-btn {
+        background: $primary;
+        border: none;
+        border-radius: $radius;
+        font-weight: 600;
+        padding: 0.7rem 1.5rem;
+        &:hover {
+          background: $primary-dark;
+        }
+      }
+    }
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .contractor-card {
+    padding: 1.2rem;
+  }
+
+  .card-header {
+    flex-direction: column;
+    align-items: flex-start !important;
+  }
+}

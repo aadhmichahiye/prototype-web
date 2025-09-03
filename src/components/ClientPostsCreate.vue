@@ -68,7 +68,13 @@
       <!-- Workers Table -->
       <div class="workers-section">
         <h3 class="section-title">Workers</h3>
-        <el-table :data="jobForm.workers" border stripe style="width: 100%">
+        <el-table
+          :data="jobForm.workers"
+          border
+          stripe
+          style="width: 100%"
+          class="workers-table"
+        >
           <el-table-column label="S.No" type="index" width="60" />
 
           <el-table-column label="Worker Type">

@@ -1,8 +1,22 @@
 <template>
   <div class="login-page">
-    <div class="login-card">
-      <h2 class="title"><i class="ri-user-line"></i> Welcome Back</h2>
-      <p class="subtitle">Login with your ID and 6-digit pin</p>
+    <!-- Left SVG Illustration (desktop only) -->
+    <div class="illustration">
+      <svg viewBox="0 0 500 500" class="hero-svg">
+        <circle cx="250" cy="250" r="200" fill="#FFE5D0" />
+        <rect x="120" y="260" width="260" height="40" rx="8" fill="#FF4500" />
+        <circle cx="200" cy="200" r="30" fill="#FF4500" />
+        <circle cx="300" cy="200" r="30" fill="#FF4500" />
+        <text x="250" y="380" text-anchor="middle" font-size="20" fill="#333">
+          Welcome Back
+        </text>
+      </svg>
+    </div>
+
+    <!-- Right Form -->
+    <div class="form-section">
+      <h2 class="title"><i class="ri-login-circle-line"></i> Login</h2>
+      <p class="subtitle">Login with your phone and 6-digit PIN</p>
 
       <el-form
         ref="loginFormRef"
@@ -11,140 +25,78 @@
         label-position="top"
         class="login-form"
       >
-        <!-- User ID -->
-        <el-form-item label="User ID" prop="id">
+        <!-- Phone -->
+        <el-form-item label="Phone Number" prop="phone">
           <el-input
-            v-model="loginForm.id"
-            placeholder="Enter your ID"
+            v-model="loginForm.phone"
+            placeholder="9876543210"
+            maxlength="10"
             clearable
-            prefix-icon="ri-id-card-line"
           />
         </el-form-item>
 
         <!-- PIN -->
-        <el-form-item label="6-Digit Pin" prop="pin">
+        <el-form-item label="6-Digit PIN" prop="pin">
           <el-input
             v-model="loginForm.pin"
             placeholder="******"
             maxlength="6"
             show-password
-            prefix-icon="ri-lock-password-line"
           />
         </el-form-item>
 
         <!-- Submit -->
         <el-form-item>
-          <el-button
-            type="primary"
-            class="login-btn"
-            @click="submitForm"
-          >
-            <i class="ri-login-circle-line mr-1"></i> Login
+          <el-button type="primary" class="login-btn" @click="submitForm">
+            <i class="ri-login-circle-line"></i> Login
           </el-button>
         </el-form-item>
       </el-form>
+
+      <!-- Register redirect -->
+      <div class="register-redirect">
+        Not a user?
+        <router-link to="/register" class="register-link">Register</router-link>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
 import { reactive, ref } from "vue";
+import { useRouter } from "vue-router";
 
+const router = useRouter();
 const loginFormRef = ref();
 
 const loginForm = reactive({
-  id: "",
+  phone: "",
   pin: "",
 });
 
 const rules = {
-  id: [{ required: true, message: "User ID is required", trigger: "blur" }],
+  phone: [
+    { required: true, message: "Phone number is required", trigger: "blur" },
+    {
+      pattern: /^[0-9]{10}$/,
+      message: "Enter valid 10-digit phone",
+      trigger: "blur",
+    },
+  ],
   pin: [
-    { required: true, message: "Pin is required", trigger: "blur" },
-    { pattern: /^[0-9]{6}$/, message: "Pin must be 6 digits", trigger: "blur" },
+    { required: true, message: "PIN is required", trigger: "blur" },
+    { pattern: /^[0-9]{6}$/, message: "PIN must be 6 digits", trigger: "blur" },
   ],
 };
 
 const submitForm = () => {
   loginFormRef.value.validate((valid) => {
     if (valid) {
-      console.log("Login attempt:", loginForm);
-      // TODO: call API for login
+      console.log("Login success:", loginForm);
+      router.push("/contractor-posts/list"); // redirect based on role later
     } else {
       console.log("Validation failed");
-      return false;
     }
   });
 };
 </script>
-
-<style lang="scss" scoped>
-$primary-color: #ff7a00; // Dark Orange
-$text-dark: #111;
-$text-light: #555;
-
-.login-page {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  background: #fff; // keep background white
-  padding: 1rem;
-}
-
-.login-card {
-  width: 100%;
-  max-width: 400px;
-  background: #fff;
-  border: 2px solid $primary-color;
-  border-radius: 1rem;
-  padding: 2rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-
-  .title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: $primary-color;
-    margin-bottom: 0.5rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .subtitle {
-    font-size: 0.9rem;
-    color: $text-light;
-    margin-bottom: 2rem;
-  }
-
-  .login-form {
-    .el-form-item__label {
-      font-weight: 600;
-      color: $text-dark;
-    }
-  }
-
-  .login-btn {
-    width: 100%;
-    background: $primary-color;
-    border: none;
-    color: #fff;
-    font-weight: 600;
-    padding: 0.8rem;
-    font-size: 1rem;
-    border-radius: 0.5rem;
-    transition: all 0.2s ease;
-
-    &:hover {
-      background: darken($primary-color, 10%);
-    }
-  }
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .login-card {
-    padding: 1.5rem;
-  }
-}
-</style>

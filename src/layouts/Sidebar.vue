@@ -122,7 +122,7 @@
 
           <button class="nav-item logout" type="button">
             <i class="ri-logout-box-line nav-icon"></i>
-            <span class="nav-label">Logout</span>
+            <span class="nav-label" @click="handleLogout">Logout</span>
           </button>
         </nav>
       </aside>
@@ -133,8 +133,10 @@
 <script setup>
 import { computed, onMounted, onBeforeUnmount, watch } from "vue";
 import { useSidebarStore } from "../stores/sidebar";
+import { useRouter } from "vue-router";
 
 const sidebar = useSidebarStore();
+const router = useRouter();
 
 function handleResize() {
   sidebar.handleResize();
@@ -143,6 +145,10 @@ function handleResize() {
 function toggleSidebar() {
   sidebar.toggle();
 }
+
+const handleLogout = () => {
+  router.push("/login");
+};
 
 onMounted(() => window.addEventListener("resize", handleResize));
 onBeforeUnmount(() => window.removeEventListener("resize", handleResize));

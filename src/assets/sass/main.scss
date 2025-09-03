@@ -3,18 +3,16 @@
 
 @import "base/base";
 @import "layouts/sidebar";
-// @import "layouts/mainlayout";
 
-// @import "components/clientjoblisting";
-// @import "components/clientpostjob";
-// @import "components/contractorcreatepost";
-// @import "components/contractorjoblist";
-// @import "components/contractorpostdetails";
 @import "components/listofclientposts";
 @import "components/listofcontractorposts";
 @import "components/clientpostscreate";
 @import "components/contractorpostscreate";
+@import "components/clientpostdetails";
+@import "components/contractorpostdetails";
+@import "components/searchbar";
 
-// @import "components/settings";
-// @import "views/login";
-// @import "views/register";
+@import "components/settings";
+@import "views/login";
+@import "views/register";
+@import "views/terms";

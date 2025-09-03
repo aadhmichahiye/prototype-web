@@ -12,7 +12,6 @@
   .contractor-form {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
 
     .grid-2 {
       display: grid;
@@ -33,6 +32,41 @@
         color: $text-dark;
       }
 
+      .workers-table {
+        width: 100%;
+        overflow-x: auto; // ✅ horizontal scroll on mobile
+        display: block;
+
+        table {
+          width: 100%;
+          min-width: 480px; // ✅ ensure columns don’t collapse
+        }
+
+        .el-table__cell {
+          padding: 0.5rem;
+          font-size: 0.9rem;
+          white-space: nowrap; // ✅ no weird wrapping
+        }
+
+        /* Make form controls fit better */
+        .el-select {
+          min-width: 140px;
+        }
+
+        .el-input-number {
+          max-width: 120px;
+        }
+
+        .el-button {
+          min-width: 36px;
+          height: 36px;
+          padding: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+      }
+
       .add-worker-btn {
         margin-top: 1rem;
         border: 1px solid $primary;
@@ -40,6 +74,26 @@
         &:hover {
           background: $primary;
           color: $white;
+        }
+      }
+    }
+
+    /* Mobile tweaks */
+    @media (max-width: 600px) {
+      .workers-section {
+        .workers-table {
+          table {
+            min-width: 420px; // ✅ shrink slightly for smaller screens
+          }
+          .el-table__cell {
+            font-size: 0.85rem;
+            padding: 0.4rem;
+          }
+        }
+
+        .add-worker-btn {
+          width: 100%; // ✅ full-width button for touch
+          justify-content: center;
         }
       }
     }

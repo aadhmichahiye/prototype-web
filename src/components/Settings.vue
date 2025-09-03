@@ -1,8 +1,6 @@
 <template>
   <div class="settings-page">
-    <h2 class="page-heading">
-      <i class="ri-settings-3-line"></i> Account Settings
-    </h2>
+    <h2 class="page-title"><i class="ri-settings-3-line"></i> Settings</h2>
 
     <el-form
       ref="settingsFormRef"
@@ -11,44 +9,71 @@
       label-position="top"
       class="settings-form"
     >
-      <!-- User Info -->
+      <!-- User Details -->
       <div class="form-section">
-        <h3 class="section-heading">Basic Details</h3>
+        <h3 class="section-title">User Details</h3>
 
-        <el-form-item label="Full Name" prop="name">
-          <el-input v-model="settingsForm.name" placeholder="Enter your name" clearable />
-        </el-form-item>
+        <div class="grid-2">
+          <el-form-item label="Full Name" prop="name">
+            <el-input
+              v-model="settingsForm.name"
+              placeholder="Enter your name"
+              clearable
+            />
+          </el-form-item>
 
-        <el-form-item label="Phone Number" prop="phone">
-          <el-input v-model="settingsForm.phone" placeholder="9876543210" maxlength="10" clearable />
-        </el-form-item>
+          <el-form-item label="Phone" prop="phone">
+            <el-input
+              v-model="settingsForm.phone"
+              placeholder="9876543210"
+              maxlength="10"
+              clearable
+            />
+          </el-form-item>
+        </div>
 
-        <el-form-item label="Role" prop="role">
-          <el-select v-model="settingsForm.role" placeholder="Select role">
-            <el-option label="Client" value="client" />
-            <el-option label="Contractor" value="contractor" />
-          </el-select>
+        <el-form-item label="Role">
+          <el-input v-model="settingsForm.role" disabled />
         </el-form-item>
       </div>
 
-      <!-- Security Pin -->
+      <!-- Security -->
       <div class="form-section">
-        <h3 class="section-heading">Security Pin</h3>
+        <h3 class="section-title">Security</h3>
 
-        <el-form-item label="6-Digit Pin" prop="pin">
-          <el-input
-            v-model="settingsForm.pin"
-            placeholder="******"
-            maxlength="6"
-            show-password
-          />
-        </el-form-item>
+        <div class="grid-2">
+          <el-form-item label="New PIN" prop="pin">
+            <el-input
+              v-model="settingsForm.pin"
+              placeholder="******"
+              maxlength="6"
+              show-password
+            />
+          </el-form-item>
+
+          <el-form-item label="Confirm PIN" prop="confirmPin">
+            <el-input
+              v-model="settingsForm.confirmPin"
+              placeholder="******"
+              maxlength="6"
+              show-password
+            />
+          </el-form-item>
+          <el-form-item label="Old PIN" prop="oldPin">
+            <el-input
+              v-model="settingsForm.pin"
+              placeholder="******"
+              maxlength="6"
+              show-password
+            />
+          </el-form-item>
+        </div>
       </div>
 
       <!-- Submit -->
       <div class="form-footer">
         <el-button type="primary" class="save-btn" @click="submitForm">
-          <i class="ri-save-3-line mr-1"></i> Save Changes
+          Save Changes
         </el-button>
       </div>
     </el-form>
@@ -61,31 +86,49 @@ import { reactive, ref } from "vue";
 const settingsFormRef = ref();
 
 const settingsForm = reactive({
-  name: "",
-  phone: "",
-  role: "",
+  name: "John Doe", // default (to be replaced with real user data)
+  phone: "9876543210",
+  role: "Contractor",
   pin: "",
+  confirmPin: "",
+  oldPin: "",
 });
 
-// Validation rules
 const rules = {
   name: [{ required: true, message: "Name is required", trigger: "blur" }],
   phone: [
-    { required: true, message: "Phone number is required", trigger: "blur" },
-    { pattern: /^[0-9]{10}$/, message: "Enter valid 10-digit phone", trigger: "blur" },
+    { required: true, message: "Phone is required", trigger: "blur" },
+    {
+      pattern: /^[0-9]{10}$/,
+      message: "Enter valid 10-digit phone",
+      trigger: "blur",
+    },
   ],
-  role: [{ required: true, message: "Role is required", trigger: "change" }],
+  oldPin: [
+    { pattern: /^[0-9]{6}$/, message: "PIN must be 6 digits", trigger: "blur" },
+  ],
   pin: [
-    { required: true, message: "Pin is required", trigger: "blur" },
-    { pattern: /^[0-9]{6}$/, message: "Pin must be 6 digits", trigger: "blur" },
+    { pattern: /^[0-9]{6}$/, message: "PIN must be 6 digits", trigger: "blur" },
+  ],
+  confirmPin: [
+    {
+      validator: (rule, value, callback) => {
+        if (value !== settingsForm.pin) {
+          callback(new Error("Pins do not match"));
+        } else {
+          callback();
+        }
+      },
+      trigger: "blur",
+    },
   ],
 };
 
 const submitForm = () => {
   settingsFormRef.value.validate((valid) => {
     if (valid) {
-      console.log("Settings updated", settingsForm);
-      // TODO: Send API request here
+      console.log("Settings saved:", settingsForm);
+      // TODO: API call for saving
     } else {
       console.log("Validation failed");
       return false;
@@ -93,62 +136,3 @@ const submitForm = () => {
   });
 };
 </script>
-
-<style lang="scss" scoped>
-.settings-page {
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 2rem 1rem;
-
-  .page-heading {
-    font-size: 1.4rem;
-    font-weight: 600;
-    margin-bottom: 2rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: #111;
-  }
-
-  .settings-form {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-  }
-
-  .form-section {
-    .section-heading {
-      font-size: 1rem;
-      font-weight: 600;
-      margin-bottom: 1rem;
-      color: #333;
-    }
-  }
-
-  .form-footer {
-    margin-top: 2rem;
-    text-align: center;
-
-    .save-btn {
-      width: 100%;
-      background: #000;
-      border: none;
-      color: #fff;
-      padding: 0.75rem;
-      font-size: 1rem;
-      border-radius: 0.5rem;
-
-      &:hover {
-        background: #222;
-      }
-    }
-  }
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .settings-page {
-    padding: 1rem;
-  }
-}
-</style>

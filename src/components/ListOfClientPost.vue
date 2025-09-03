@@ -1,4 +1,5 @@
 <template>
+  <SearchBar />
   <div class="client-post-list">
     <div v-for="post in posts" :key="post.id" class="client-post-card">
       <div class="card-header">
@@ -25,7 +26,12 @@
 
       <div class="footer">
         <p>open</p>
-        <el-button type="primary" size="small" class="contact-btn">
+        <el-button
+          type="primary"
+          size="small"
+          class="contact-btn"
+          @click="handleViewDetails"
+        >
           Contact Client
         </el-button>
       </div>
@@ -34,6 +40,9 @@
 </template>
 
 <script setup>
+import { useRouter } from "vue-router";
+import SearchBar from "./SearchBar.vue";
+const router = useRouter();
 const posts = [
   {
     id: 1,
@@ -141,4 +150,8 @@ const posts = [
     ],
   },
 ];
+
+const handleViewDetails = () => {
+  router.push("/client-posts/details/id");
+};
 </script>
