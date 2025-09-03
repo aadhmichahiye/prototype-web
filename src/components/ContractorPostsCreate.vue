@@ -96,7 +96,7 @@
             </template>
           </el-table-column>
 
-          <el-table-column label="Count" width="120">
+          <el-table-column label="Count" width="180">
             <template #default="scope">
               <el-input-number v-model="scope.row.count" :min="1" :max="999" />
             </template>
