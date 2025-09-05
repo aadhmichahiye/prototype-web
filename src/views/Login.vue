@@ -24,6 +24,7 @@
         :rules="rules"
         label-position="top"
         class="login-form"
+        v-loading="loading"
       >
         <!-- Phone -->
         <el-form-item label="Phone Number" prop="phone">
@@ -47,7 +48,7 @@
 
         <!-- Submit -->
         <el-form-item>
-          <el-button type="primary" class="login-btn" @click="submitForm">
+          <el-button type="primary" class="login-btn" @click="handleLogin">
             <i class="ri-login-circle-line"></i> Login
           </el-button>
         </el-form-item>
@@ -65,9 +66,11 @@
 <script setup>
 import { reactive, ref } from "vue";
 import { useRouter } from "vue-router";
+import { ElNotification } from "element-plus";
 
 const router = useRouter();
 const loginFormRef = ref();
+const loading = ref(false);
 
 const loginForm = reactive({
   phone: "",
@@ -89,14 +92,47 @@ const rules = {
   ],
 };
 
-const submitForm = () => {
-  loginFormRef.value.validate((valid) => {
-    if (valid) {
-      console.log("Login success:", loginForm);
-      router.push("/contractor-posts/list"); // redirect based on role later
-    } else {
-      console.log("Validation failed");
+async function handleLogin() {
+  loginFormRef.value.validate(async (valid) => {
+    if (!valid) return;
+
+    loading.value = true;
+    try {
+      const payload = { phone: `+91${loginForm.phone}`, pin: loginForm.pin };
+
+      const res = await loginClient(payload);
+
+      if (res?.status === 200 && res?.data?.user) {
+        // Save user info
+        localStorage.setItem("users", JSON.stringify(res.data.user));
+        // Save token to store
+        UserStore.loginToken(res.data.tokens.accessToken);
+        UserStore.setUserData(res.data.user);
+        // Redirect based on role
+        if (res.data.user.role === "client") {
+          router.push("/client");
+        } else if (res.data.user.role === "contractor") {
+          router.push("/contractor");
+        } else {
+          router.push("/"); // fallback route
+        }
+      } else {
+        ElNotification({
+          title: "Login Failed",
+          message: res?.data?.message || "Invalid credentials",
+          type: "warning",
+        });
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      ElNotification({
+        title: "Error",
+        message: error?.response?.data?.message || "Something went wrong",
+        type: "error",
+      });
+    } finally {
+      loading.value = false;
     }
   });
-};
+}
 </script>
