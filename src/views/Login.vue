@@ -67,10 +67,13 @@
 import { reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 import { ElNotification } from "element-plus";
+import { userLogin } from "../api/user";
+import { useUserStore } from "../stores/userStore";
 
 const router = useRouter();
 const loginFormRef = ref();
 const loading = ref(false);
+const UserStore = useUserStore();
 
 const loginForm = reactive({
   phone: "",
@@ -100,19 +103,22 @@ async function handleLogin() {
     try {
       const payload = { phone: `+91${loginForm.phone}`, pin: loginForm.pin };
 
-      const res = await loginClient(payload);
+      const res = await userLogin(payload);
 
       if (res?.status === 200 && res?.data?.user) {
         // Save user info
         localStorage.setItem("users", JSON.stringify(res.data.user));
         // Save token to store
-        UserStore.loginToken(res.data.tokens.accessToken);
+
+        const accessToken = res.data.tokens?.accessToken;
+
+        UserStore.loginToken(accessToken);
         UserStore.setUserData(res.data.user);
         // Redirect based on role
         if (res.data.user.role === "client") {
-          router.push("/client");
+          router.push("/contractor-posts/list");
         } else if (res.data.user.role === "contractor") {
-          router.push("/contractor");
+          router.push("/client-posts/list");
         } else {
           router.push("/"); // fallback route
         }
