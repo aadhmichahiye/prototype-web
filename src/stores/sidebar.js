@@ -4,8 +4,8 @@ export const useSidebarStore = defineStore("sidebar", {
   state: () => ({
     width: window.innerWidth,
     isDesktop: window.innerWidth >= 1024,
-    desktopExpanded: true,   // expanded/collapsed state on desktop
-    mobileOpen: false,       // open/close state on mobile
+    desktopExpanded: true, // expanded/collapsed state on desktop
+    mobileOpen: false, // open/close state on mobile
   }),
 
   actions: {
