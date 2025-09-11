@@ -10,6 +10,7 @@ import ContractorPostsCreate from "../components/ContractorPostsCreate.vue";
 import ClientPostDetails from "../components/ClientPostDetails.vue";
 import ContractorPostsDetails from "../components/ContractorPostsDetails.vue";
 import TermsAndConditions from "../views/TermsAndConditions.vue";
+import ClientMyPosts from "../components/ClientMyPosts.vue";
 const routes = [
   //   { path: "/login", component: Login }, // auth without sidebar
   {
@@ -45,6 +46,10 @@ const routes = [
       {
         path: "contractor-posts/list",
         component: ListOfContractorPost,
+      },
+      {
+        path: "client-posts/my-posts",
+        component: ClientMyPosts,
       },
       {
         path: "client-posts/details/:id",

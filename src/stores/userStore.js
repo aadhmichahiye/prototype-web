@@ -62,6 +62,7 @@ export const useUserStore = defineStore("USER", {
         // ignore network errors but still clear local state
         console.warn("Logout API failed:", e);
       } finally {
+        localStorage.removeItem("users");
         // clear client state and redirect
         this.loginTokenRemove();
         this.userData = {};
