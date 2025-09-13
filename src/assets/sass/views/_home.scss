@@ -7,7 +7,8 @@
   flex-direction: column;
   background: var(--muted-bg, #fafafa);
   color: var(--text-dark);
-  padding: rem(8);
+  padding: 0;
+  box-sizing: border-box;
 
   // header
   .site-header {
@@ -148,6 +149,7 @@
     max-width: 1180px;
     margin: rem(18) auto;
     padding: 0 rem(12);
+    padding-bottom: rem(126);
 
     .card {
       background: var(--white);
@@ -199,7 +201,7 @@
   // Floating Login centered bottom
   .floating-login {
     position: fixed;
-    left: 50%;
+    right: 15%;
     transform: translateX(-50%);
     bottom: rem(18);
     z-index: 3000;
