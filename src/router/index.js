@@ -11,8 +11,14 @@ import ClientPostDetails from "../components/ClientPostDetails.vue";
 import ContractorPostsDetails from "../components/ContractorPostsDetails.vue";
 import TermsAndConditions from "../views/TermsAndConditions.vue";
 import ClientMyPosts from "../components/ClientMyPosts.vue";
+import Home from "../views/Home.vue";
 const routes = [
   //   { path: "/login", component: Login }, // auth without sidebar
+  {
+    path: "/",
+    name: "Home",
+    component: Home, // 👈 standalone, no MainLayout
+  },
   {
     path: "/login",
     name: "Login",
