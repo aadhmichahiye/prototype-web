@@ -22,3 +22,11 @@ export function deleteClientPost(id) {
     method: "delete",
   });
 }
+
+export function createClientJob(data) {
+  return request({
+    url: "client-job-posts/create",
+    method: "post",
+    data,
+  });
+}

@@ -1,72 +1,11 @@
 <template>
   <div class="client-visits-posts page-container">
     <div class="layout">
-      <!-- Sidebar filters (collapsible on mobile) -->
-      <aside :class="['filters', { open: filtersOpen }]">
-        <div class="filters-header">
-          <h3>Filters</h3>
-          <button
-            class="toggle"
-            @click="filtersOpen = !filtersOpen"
-            aria-label="toggle filters"
-          >
-            <i :class="filtersOpen ? 'ri-close-line' : 'ri-filter-2-line'"></i>
-          </button>
-        </div>
-
-        <div class="filters-body">
-          <el-input
-            v-model="filters.q"
-            placeholder="Search title / description"
-            clearable
-            @input="onFilterChanged"
-          >
-            <template #prefix><i class="ri-search-line"></i></template>
-          </el-input>
-
-          <el-select
-            v-model="filters.city"
-            placeholder="City"
-            clearable
-            @change="onFilterChanged"
-          >
-            <el-option label="Hyderabad" value="Hyderabad" />
-            <el-option label="Mumbai" value="Mumbai" />
-            <el-option label="Delhi" value="Delhi" />
-            <!-- extend as you like -->
-          </el-select>
-
-          <el-input
-            v-model="filters.pinCode"
-            placeholder="Pin code"
-            maxlength="6"
-            @input="onFilterChanged"
-          />
-
-          <el-select
-            v-model="filters.status"
-            placeholder="Status"
-            clearable
-            @change="onFilterChanged"
-          >
-            <el-option label="open" value="open" />
-            <el-option label="closed" value="closed" />
-          </el-select>
-
-          <div class="filter-actions">
-            <el-button type="primary" @click="applyFilters">Apply</el-button>
-            <el-button @click="resetFilters">Reset</el-button>
-          </div>
-        </div>
-      </aside>
-
-      <!-- Main content -->
+      <!-- Main content only (no sidebar filters) -->
       <main class="content">
         <div class="header-row">
           <div class="left">
-            <div class="badge">
-              <i class="ri-briefcase-4-line"></i>
-            </div>
+            <div class="badge"><i class="ri-briefcase-4-line"></i></div>
             <div class="heading">
               <h1>My Posts</h1>
               <p class="muted">
@@ -107,20 +46,32 @@
                   <p class="desc">{{ post.description }}</p>
 
                   <div class="meta">
-                    <span class="meta-item"
-                      ><i class="ri-map-pin-line"></i> {{ post.city }} ·
-                      {{ post.pinCode }}</span
-                    >
-                    <span class="meta-item"
-                      ><i class="ri-time-line"></i>
-                      {{ formatDate(post.createdAt) }}</span
-                    >
+                    <span class="meta-item">
+                      <i class="ri-map-pin-line"></i> {{ post.city }}
+                    </span>
+                    <span class="meta-item">
+                      <i class="ri-map-pin-line"></i>
+                      {{ post.pinCode || post.pincode }}
+                    </span>
+                    <span class="meta-item">
+                      <i class="ri-time-line"></i>
+                      {{ formatDate(post.createdAt) }}
+                    </span>
+                  </div>
+
+                  <!-- Workers as chips (wrap) -->
+                  <div
+                    class="workers-list"
+                    v-if="post.requiredWorkers && post.requiredWorkers.length"
+                  >
                     <span
-                      class="meta-item"
-                      v-if="post.requiredWorkers && post.requiredWorkers.length"
+                      class="worker-chip"
+                      v-for="w in post.requiredWorkers"
+                      :key="w._id || w.type"
                     >
-                      <i class="ri-user-3-line"></i>
-                      {{ summarizeWorkers(post.requiredWorkers) }}
+                      <strong class="type">{{ w.type }}</strong>
+                      <span class="count">{{ w.count }}</span>
+                      <!-- <span class="status-dot" :data-status="w.status"></span> -->
                     </span>
                   </div>
                 </div>
@@ -142,16 +93,8 @@
                         circle
                         type="danger"
                         @click="confirmDelete(post)"
-                        ><i class="ri-delete-bin-line"></i
-                      ></el-button>
-                    </el-tooltip>
-
-                    <el-tooltip content="Contact" placement="top">
-                      <el-button
-                        circle
-                        @click="callPhone(post.contactDetails?.phone)"
                       >
-                        <i class="ri-phone-line"></i>
+                        <i class="ri-delete-bin-line"></i>
                       </el-button>
                     </el-tooltip>
                   </div>
@@ -165,10 +108,8 @@
             <el-spinner />
           </div>
 
-          <!-- Intersection observer sentinel -->
           <div ref="sentinel" class="sentinel" />
 
-          <!-- Fallback load more for mobile or if observer not supported -->
           <div
             class="load-more-wrap"
             v-if="
@@ -186,10 +127,10 @@
 </template>
 
 <script setup>
-/* ClientVisitsPosts.vue
-  - infinite scroll via IntersectionObserver
-  - filter sidebar
-  - loads from GET /api/client-job-posts/my-posts
+/* ClientVisitsPosts.vue (updated UI)
+   - removed filters sidebar
+   - workers rendered as chips
+   - removed call phone action
 */
 
 import { ref, reactive, onMounted, onBeforeUnmount, watch } from "vue";
@@ -209,12 +150,9 @@ const totalPages = ref(1);
 const totalItems = ref(0);
 const autoLoading = ref(true);
 
-const filtersOpen = ref(false);
 const infiniteObserverSupported = typeof IntersectionObserver !== "undefined";
-
 const sentinel = ref(null);
 let observer = null;
-let observerActive = false;
 
 const filters = reactive({
   q: "",
@@ -225,27 +163,22 @@ const filters = reactive({
 
 const pageStateKey = "client_my_posts_page_state";
 
-// small debounce for search
 const doFetchDebounced = debounce(() => {
   resetAndFetch();
 }, 450);
 
 function onFilterChanged() {
-  // immediate local update but debounce network call
   doFetchDebounced();
 }
 
 async function fetchPage(p = 1) {
-  if (p === 1) {
-    loading.value = true;
-  } else {
-    loadingMore.value = true;
-  }
+  if (p === 1) loading.value = true;
+  else loadingMore.value = true;
 
   try {
     const params = {
       page: p,
-      limit: limit.value,
+      limit,
       q: filters.q || undefined,
       city: filters.city || undefined,
       pinCode: filters.pinCode || undefined,
@@ -253,27 +186,21 @@ async function fetchPage(p = 1) {
     };
 
     const res = await fetchMyPosts(params);
-    // expected structure: { message, meta: { total, page, limit, pages }, data: [] }
-    const meta = res?.data?.meta || res?.meta;
+    const meta = res?.data?.meta || res?.meta || {};
     const data = res?.data?.data || res?.data || [];
 
-    totalItems.value = meta?.total || data.length;
+    totalItems.value =
+      meta?.total || (page.value === 1 ? data.length : totalItems.value);
     totalPages.value =
       meta?.pages ||
-      Math.ceil((meta?.total || data.length) / (meta?.limit || limit.value));
+      Math.ceil((meta?.total || data.length) / (meta?.limit || limit));
     page.value = meta?.page || p;
 
-    if (p === 1) {
-      posts.value = data;
-    } else {
-      posts.value = posts.value.concat(data);
-    }
+    if (p === 1) posts.value = data;
+    else posts.value = posts.value.concat(data);
   } catch (err) {
     console.error("Failed to load posts", err);
-    ElMessage({
-      message: "Failed to load posts",
-      type: "error",
-    });
+    ElMessage({ message: "Failed to load posts", type: "error" });
   } finally {
     loading.value = false;
     loadingMore.value = false;
@@ -285,9 +212,7 @@ async function resetAndFetch() {
   totalPages.value = 1;
   posts.value = [];
   await fetchPage(1);
-  // re-observe sentinel in case we appended
   activateObserver();
-  // persist some page state
   try {
     localStorage.setItem(
       pageStateKey,
@@ -302,7 +227,6 @@ function loadMore() {
   fetchPage(next);
 }
 
-// edit navigation
 function handleEdit(post) {
   router.push({ name: "ClientPostEdit", params: { id: post._id } });
 }
@@ -314,20 +238,12 @@ async function confirmDelete(post) {
       cancelButtonText: "Cancel",
       type: "warning",
     });
-    // user confirmed
     await deleteClientPost(post._id);
     ElMessage({ message: "Post deleted", type: "success" });
-    // refresh current page
     resetAndFetch();
   } catch (err) {
-    // cancel or error
+    // cancelled or failed
   }
-}
-
-function callPhone(phone) {
-  if (!phone) return;
-  // attempt direct tel call
-  window.location.href = `tel:${phone}`;
 }
 
 function formatDate(d) {
@@ -346,11 +262,10 @@ function goCreate() {
   router.push("/client-posts/create");
 }
 
-/* IntersectionObserver handling */
+/* IntersectionObserver */
 function onIntersection(entries) {
   for (const entry of entries) {
     if (entry.isIntersecting) {
-      // load next page if available
       if (page.value < totalPages.value) {
         fetchPage(page.value + 1);
       }
@@ -360,11 +275,7 @@ function onIntersection(entries) {
 
 function activateObserver() {
   if (!infiniteObserverSupported) return;
-  // disconnect existing
-  if (observer) {
-    observer.disconnect();
-    observerActive = false;
-  }
+  if (observer) observer.disconnect();
   if (!sentinel.value) return;
   observer = new IntersectionObserver(onIntersection, {
     root: null,
@@ -372,69 +283,34 @@ function activateObserver() {
     threshold: 0.1,
   });
   observer.observe(sentinel.value);
-  observerActive = true;
 }
 
 function deactivateObserver() {
   if (observer) {
     observer.disconnect();
     observer = null;
-    observerActive = false;
   }
 }
 
 onMounted(() => {
-  // restore filters/page if present
   try {
     const saved = JSON.parse(localStorage.getItem(pageStateKey) || "{}");
-    if (saved.filters) {
-      Object.assign(filters, saved.filters);
-    }
+    if (saved.filters) Object.assign(filters, saved.filters);
   } catch (e) {}
   resetAndFetch();
+  if (infiniteObserverSupported) activateObserver();
 
-  if (infiniteObserverSupported) {
-    activateObserver();
-  }
+  // small responsive toggle for auto-loading
+  const isSmallScreen = window.innerWidth <= 720;
+  autoLoading.value = !isSmallScreen;
 });
 
 onBeforeUnmount(() => {
   deactivateObserver();
 });
 
-/* small helper - apply/reset filters */
-function applyFilters() {
-  resetAndFetch();
-  filtersOpen.value = false;
-}
-
-function resetFilters() {
-  filters.q = "";
-  filters.city = "";
-  filters.pinCode = "";
-  filters.status = "";
-  resetAndFetch();
-}
-
-/* small UI state: on small screens prefer manual Load More */
-const isSmallScreen = ref(window.innerWidth <= 720);
-window.addEventListener(
-  "resize",
-  () => (isSmallScreen.value = window.innerWidth <= 720)
-);
-
-const autoObserverToggle = () => {
-  // if small screen, don't auto infinite load — prefer manual
-  autoLoading.value = !isSmallScreen.value;
-};
-
-watch(isSmallScreen, () => {
-  autoObserverToggle();
-});
-
-/* wire debounce for search */
+/* keep search debounce watcher in case other UI updates need it */
 const onFilterDebounced = debounce(resetAndFetch, 450);
-
 watch(
   () => filters.q,
   () => {

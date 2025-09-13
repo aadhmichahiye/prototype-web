@@ -102,11 +102,14 @@
 </template>
 
 <script setup>
+import { ElNotification } from "element-plus";
 import { reactive, ref } from "vue";
 import { useRouter } from "vue-router";
+import { userRegister } from "../api/user";
 
 const router = useRouter();
 const registerFormRef = ref();
+const loading = ref(false);
 
 const registerForm = reactive({
   name: "",
@@ -116,6 +119,15 @@ const registerForm = reactive({
   confirmPin: "",
   terms: false,
 });
+
+function normalizePhone(phone) {
+  if (!phone) return "";
+  const digits = phone.replace(/\D/g, "");
+  if (digits.length === 10) return `+91${digits}`;
+  if (digits.startsWith("91") && digits.length === 12) return `+${digits}`;
+  if (phone.startsWith("+")) return phone;
+  return phone; // fallback: send as-is
+}
 
 const rules = {
   name: [{ required: true, message: "Name is required", trigger: "blur" }],
@@ -153,13 +165,88 @@ const rules = {
   ],
 };
 
-const submitForm = () => {
-  registerFormRef.value.validate((valid) => {
-    if (valid) {
-      console.log("Registered:", registerForm);
-      router.push("/login"); // redirect after success
-    } else {
-      console.log("Validation failed");
+const submitForm = async () => {
+  if (!registerFormRef.value) return;
+
+  // Element Plus validate callback style
+  registerFormRef.value.validate(async (valid) => {
+    if (!valid) {
+      ElNotification({
+        title: "Validation",
+        message: "Please fix the highlighted fields before submitting.",
+        type: "warning",
+      });
+      return false;
+    }
+
+    // basic additional checks
+    if (registerForm.pin !== registerForm.confirmPin) {
+      ElNotification({
+        title: "Validation",
+        message: "PIN and Confirm PIN do not match.",
+        type: "warning",
+      });
+      return false;
+    }
+
+    if (!registerForm.terms) {
+      ElNotification({
+        title: "Terms",
+        message: "You must accept the terms and conditions to register.",
+        type: "warning",
+      });
+      return false;
+    }
+
+    // Build payload for backend
+    const payload = {
+      name: registerForm.name,
+      phone: normalizePhone(registerForm.phone),
+      role: registerForm.role,
+      pin: registerForm.pin,
+    };
+
+    loading.value = true;
+
+    try {
+      const res = await userRegister(payload);
+
+      if (res?.status === 200 || res?.status === 201) {
+        ElNotification({
+          title: "Success",
+          message: "Registration successful. Please login.",
+          type: "success",
+        });
+
+        // reset form (optional)
+        registerForm.name = "";
+        registerForm.phone = "";
+        registerForm.role = "";
+        registerForm.pin = "";
+        registerForm.confirmPin = "";
+        registerForm.terms = false;
+
+        // redirect to login
+        router.push("/login");
+      } else {
+        ElNotification({
+          title: "Error",
+          message: res?.data?.message || "Registration failed",
+          type: "error",
+        });
+      }
+    } catch (err) {
+      console.error("Register error:", err);
+      ElNotification({
+        title: "Error",
+        message:
+          err?.response?.data?.message ||
+          err?.message ||
+          "Network/Server error while registering.",
+        type: "error",
+      });
+    } finally {
+      loading.value = false;
     }
   });
 };

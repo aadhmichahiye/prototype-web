@@ -85,7 +85,7 @@
                 style="width: 100%"
               >
                 <el-option label="Mason" value="Mason" />
-                <el-option label="Helpers" value="Helpers" />
+                <el-option label="Helpers" value="Helper" />
                 <el-option label="Electrician" value="Electrician" />
                 <el-option label="Plumber" value="Plumber" />
                 <el-option label="Carpenter" value="Carpenter" />
@@ -134,9 +134,14 @@
 </template>
 
 <script setup>
+import { ElNotification } from "element-plus";
 import { reactive, ref } from "vue";
+import { createClientJob } from "../api/client";
+import { useRouter } from "vue-router";
 
 const jobFormRef = ref();
+const loading = ref(false);
+const router = useRouter();
 
 const jobForm = reactive({
   title: "",
@@ -183,13 +188,92 @@ const removeWorker = (index) => {
   jobForm.workers.splice(index, 1);
 };
 
-const submitForm = () => {
-  jobFormRef.value.validate((valid) => {
-    if (valid) {
-      console.log("Form submitted:", jobForm);
-    } else {
-      console.log("Validation failed");
+const submitForm = async () => {
+  // validate (Element Plus callback style)
+  if (!jobFormRef.value) return;
+
+  jobFormRef.value.validate(async (valid) => {
+    if (!valid) {
+      ElNotification({
+        title: "Validation",
+        message: "Please fix the highlighted fields before submitting.",
+        type: "warning",
+      });
       return false;
+    }
+
+    // Build request body to match backend shape
+    const payload = {
+      title: jobForm.title,
+      description: jobForm.description,
+      city: jobForm.city || "Hyderabad",
+      location: jobForm.address || "", // backend expects `location`
+      pinCode: jobForm.pincode || jobForm.pinCode || "",
+      // Map workers -> requiredWorkers (only include entries with a type and count)
+      requiredWorkers: (jobForm.workers || [])
+        .filter((w) => w && w.type && Number(w.count) > 0)
+        .map((w) => ({
+          type: w.type.toLocaleLowerCase(),
+          count: Number(w.count),
+        })),
+      // optional contact details, if backend expects nested contactDetails:
+      // contactDetails: { phone: jobForm.phone }
+    };
+
+    // Minimal validation for workers: ensure at least one worker present
+    if (!payload.requiredWorkers.length) {
+      ElNotification({
+        title: "Validation",
+        message: "Please add at least one worker with type and count.",
+        type: "warning",
+      });
+      return false;
+    }
+
+    loading.value = true;
+
+    try {
+      const res = await createClientJob(payload);
+
+      if (res?.status === 200 || res?.status === 201) {
+        ElNotification({
+          title: "Success",
+          message: "Job posted successfully.",
+          type: "success",
+        });
+
+        // Optional: reset form to default
+        jobForm.title = "";
+        jobForm.description = "";
+        jobForm.city = "Hyderabad";
+        jobForm.pincode = "";
+        jobForm.address = "";
+        jobForm.phone = "";
+        jobForm.workers = [{ type: "", count: 1 }];
+
+        // Navigate to 'my posts' or listing page
+        // change the route as per your app (example: /client-posts/list or /client-job-posts/my-posts)
+        router.push("/client-posts/my-posts");
+      } else {
+        // handle API messages
+        ElNotification({
+          title: "Error",
+          message: res?.data?.message || "Failed to create job.",
+          type: "error",
+        });
+      }
+    } catch (err) {
+      console.error("Create job error:", err);
+      ElNotification({
+        title: "Error",
+        message:
+          err?.response?.data?.message ||
+          err?.message ||
+          "Network/Server error while creating job.",
+        type: "error",
+      });
+    } finally {
+      loading.value = false;
     }
   });
 };

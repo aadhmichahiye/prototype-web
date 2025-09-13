@@ -30,7 +30,7 @@ export function userLogout() {
   });
 }
 
-export function userRegistration(data) {
+export function userRegister(data) {
   return request({
     url: "user/register",
     method: "post",
