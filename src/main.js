@@ -7,6 +7,7 @@ import router from "./router";
 import ElementPlus from "element-plus";
 import "element-plus/dist/index.css";
 import { useUserStore } from "./stores/userStore";
+import authGuard from "./utils/authGuard";
 
 // Create app & store
 const app = createApp(App);
@@ -20,4 +21,5 @@ app.use(ElementPlus);
 const user = useUserStore();
 user.pageLoadedORRefreshed(); // restores token and starts timer if token exists
 // Mount app
+router.beforeEach(authGuard);
 app.mount("#app");

@@ -39,33 +39,43 @@ const routes = [
     component: MainLayout,
     children: [
       { path: "", redirect: "/contractor-posts/list" },
-      { path: "client-posts/create", component: ClientPostsCreate },
+      {
+        path: "client-posts/create",
+        component: ClientPostsCreate,
+        meta: { requiresAuth: true, roles: ["client"] },
+      },
       {
         path: "contractor-posts/create",
         component: ContractorPostsCreate,
+        meta: { requiresAuth: true, roles: ["contractor"] },
       },
       { path: "settings", component: Settings },
       {
         path: "client-posts/list",
         component: ListOfClientPost,
+        meta: { requiresAuth: true, roles: ["contractor"] },
       },
       {
         path: "contractor-posts/list",
         component: ListOfContractorPost,
+        meta: { requiresAuth: true, roles: ["client"] },
       },
       {
         path: "client-posts/my-posts",
         component: ClientMyPosts,
+        meta: { requiresAuth: true, roles: ["client"] },
       },
       {
         path: "client-posts/details/:id",
         name: "ClientPostDetails",
         component: ClientPostDetails,
+        meta: { requiresAuth: true, roles: ["contractor"] },
       },
       {
         path: "contractor-posts/details/:id",
         name: "ContractorPostsDetails",
         component: ContractorPostsDetails,
+        meta: { requiresAuth: true, roles: ["client"] },
       },
     ],
   },
