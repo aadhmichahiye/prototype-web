@@ -45,118 +45,123 @@
 </template>
 
 <script setup>
-const contractorPosts = [
-  {
-    id: 1,
-    name: "Tony",
-    city: "Hyderabad",
-    location: "Gachibowli",
-    pincode: "500032",
-    status: "open",
-    workers: [{ type: "Mason", count: 25 }],
-  },
-  {
-    id: 2,
-    name: "Ramesh",
-    city: "Hyderabad",
-    location: "Kukatpally",
-    pincode: "500072",
-    status: "open",
-    workers: [
-      { type: "Helpers", count: 40 },
-      { type: "Electrician", count: 5 },
-    ],
-  },
-  {
-    id: 3,
-    name: "Suresh",
-    city: "Hyderabad",
-    location: "Miyapur",
-    pincode: "500049",
-    status: "closed",
-    workers: [{ type: "Rod Benders", count: 12 }],
-  },
-  {
-    id: 4,
-    name: "Vikram",
-    city: "Hyderabad",
-    location: "Secunderabad",
-    pincode: "500003",
-    status: "open",
-    workers: [{ type: "Electrician", count: 8 }],
-  },
-  {
-    id: 5,
-    name: "Ravi",
-    city: "Hyderabad",
-    location: "Patancheru",
-    pincode: "502319",
-    status: "open",
-    workers: [{ type: "Helpers", count: 60 }],
-  },
-  {
-    id: 6,
-    name: "Arun",
-    city: "Hyderabad",
-    location: "Kompally",
-    pincode: "500014",
-    status: "closed",
-    workers: [
-      { type: "Mason", count: 20 },
-      { type: "Plumber", count: 6 },
-    ],
-  },
-  {
-    id: 7,
-    name: "Vijay",
-    city: "Hyderabad",
-    location: "LB Nagar",
-    pincode: "500074",
-    status: "open",
-    workers: [
-      { type: "Carpenter", count: 5 },
-      { type: "Painter", count: 8 },
-    ],
-  },
-  {
-    id: 8,
-    name: "Krishna",
-    city: "Hyderabad",
-    location: "Hitech City",
-    pincode: "500081",
-    status: "open",
-    workers: [
-      { type: "Helpers", count: 70 },
-      { type: "Electrician", count: 15 },
-    ],
-  },
-  {
-    id: 9,
-    name: "Mohan",
-    city: "Hyderabad",
-    location: "Locharam",
-    pincode: "500034",
-    status: "closed",
-    workers: [{ type: "Helpers", count: 30 }],
-  },
-  {
-    id: 10,
-    name: "Anil",
-    city: "Hyderabad",
-    location: "Banjara Hills",
-    pincode: "500045",
-    status: "open",
-    workers: [{ type: "Plumber", count: 10 }],
-  },
-];
-
+import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import Sidebar from "../layouts/Sidebar.vue";
 import SearchBar from "./SearchBar.vue";
+import { fetchContractorsApi } from "../api/contractor"; // must return axios-like response { data: { message, meta, data } }
 
 const router = useRouter();
 
-const handleViewDetails = () => {
-  router.push("/contractor-posts/details/id");
-};
+const contractorPosts = ref([]); // data used by template (card list)
+const loading = ref(false);
+const error = ref(null);
+
+const page = ref(1);
+const limit = ref(10); // change if you want different page size
+const hasMore = ref(true);
+
+// --- map one manpower-post item from backend into your card shape ---
+// backend item shape expected:
+// {
+//   _id, details (contractor id), title, name, city, location, pinCode,
+//   status, contactDetails: { phone }, availableWorkers: [ { _id, type, count, status } ], createdAt, updatedAt
+// }
+function mapPostToCard(post) {
+  // pick primary workers array (availableWorkers)
+  const workersArr = Array.isArray(post.availableWorkers)
+    ? post.availableWorkers
+    : [];
+
+  // transform workers into simple { type, count } items used by your template
+  const workers = workersArr.map((w) => ({
+    type: w.type || "worker",
+    count: w.count || 0,
+    _id: w._id,
+    status: w.status || "available",
+  }));
+
+  return {
+    id: post._id,
+    // display name: prefer post.name, fallback to title or contractor id
+    name: post.name || post.title || `Contractor ${post.details || ""}`,
+    city: post.city || "",
+    location: post.location || "",
+    pincode: post.pinCode || post.pin || "",
+    status: post.status || "open",
+    workers,
+    raw: post, // keep raw for navigation/details
+  };
+}
+
+// fetch manpower-posts page
+async function fetchContractors({ q = "", reset = false } = {}) {
+  if (loading.value) return;
+  loading.value = true;
+  error.value = null;
+
+  try {
+    if (reset) {
+      page.value = 1;
+      contractorPosts.value = [];
+      hasMore.value = true;
+    }
+
+    const params = {
+      page: page.value,
+      limit: limit.value,
+    };
+    if (q) params.search = q;
+
+    const res = await fetchContractorsApi(params);
+    // expected res.data = { message, meta, data }
+    const payload = res.data;
+    const posts = payload?.data || [];
+    const meta = payload?.meta || { page: 1, pages: 1 };
+
+    // map and append
+    const mapped = posts.map(mapPostToCard);
+
+    if (reset) {
+      contractorPosts.value = mapped;
+    } else {
+      contractorPosts.value.push(...mapped);
+    }
+
+    // determine if more pages exist
+    hasMore.value = (meta.page || page.value) < (meta.pages || 1);
+
+    // increment page for next call
+    page.value = (meta.page || page.value) + 1;
+  } catch (err) {
+    console.error("Error fetching manpower posts:", err);
+    error.value =
+      err.response?.data?.message || err.message || "Failed to load";
+  } finally {
+    loading.value = false;
+  }
+}
+
+// call on mount
+onMounted(() => {
+  fetchContractors({ reset: true });
+});
+
+// click handler: navigate to details page for manpower post
+function handleViewDetails(post) {
+  // post.raw is the backend item; use manpower post id for details route
+  const manpowerId = post.raw?._id || post.id;
+  if (manpowerId) {
+    router.push(`/contractor-posts/details/${manpowerId}`);
+  } else {
+    // fallback to contractor details by contractor id
+    const contractorId = post.raw?.details;
+    if (contractorId) router.push(`/contractor/${contractorId}`);
+  }
+}
+
+// optional: expose loadMore for "Load more" button or infinite scroll
+function loadMore() {
+  if (loading.value || !hasMore.value) return;
+  fetchContractors();
+}
 </script>

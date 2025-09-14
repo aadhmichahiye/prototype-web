@@ -16,7 +16,7 @@
 
           <div class="right">
             <el-input
-              v-model="filters.q"
+              v-model="filters.search"
               placeholder="Search by title, city, or pincode"
               clearable
               @input="onFilterChanged"
@@ -155,7 +155,7 @@ const sentinel = ref(null);
 let observer = null;
 
 const filters = reactive({
-  q: "",
+  search: "",
   city: "",
   pinCode: "",
   status: "",
@@ -178,8 +178,8 @@ async function fetchPage(p = 1) {
   try {
     const params = {
       page: p,
-      limit,
-      q: filters.q || undefined,
+      limit: limit.value,
+      search: filters.search || undefined,
       city: filters.city || undefined,
       pinCode: filters.pinCode || undefined,
       status: filters.status || undefined,
@@ -193,7 +193,7 @@ async function fetchPage(p = 1) {
       meta?.total || (page.value === 1 ? data.length : totalItems.value);
     totalPages.value =
       meta?.pages ||
-      Math.ceil((meta?.total || data.length) / (meta?.limit || limit));
+      Math.ceil((meta?.total || data.length) / (meta?.limit || limit.value));
     page.value = meta?.page || p;
 
     if (p === 1) posts.value = data;
@@ -239,7 +239,7 @@ async function confirmDelete(post) {
       type: "warning",
     });
     await deleteClientPost(post._id);
-    ElMessage({ message: "Post deleted", type: "success" });
+    ElMessage({ message: "Job Post deleted", type: "success" });
     resetAndFetch();
   } catch (err) {
     // cancelled or failed
@@ -312,7 +312,7 @@ onBeforeUnmount(() => {
 /* keep search debounce watcher in case other UI updates need it */
 const onFilterDebounced = debounce(resetAndFetch, 450);
 watch(
-  () => filters.q,
+  () => filters.search,
   () => {
     onFilterDebounced();
   }

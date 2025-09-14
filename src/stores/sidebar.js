@@ -10,7 +10,6 @@ export const useSidebarStore = defineStore("sidebar", {
 
   actions: {
     toggle() {
-      console.log("toggle action triggered");
       if (this.isDesktop) {
         this.desktopExpanded = !this.desktopExpanded;
       } else {
