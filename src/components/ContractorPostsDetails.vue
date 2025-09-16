@@ -3,7 +3,7 @@
     <div class="contractor-card">
       <!-- Header -->
       <div class="card-header">
-        <h2 class="contractor-name">{{ contractor.name }}</h2>
+        <h2 class="contractor-name">{{ contractor.name || "-" }}</h2>
         <span class="status" :class="contractor.status">{{
           contractor.status
         }}</span>
@@ -12,8 +12,8 @@
       <!-- Contact Info -->
       <div class="contact-info">
         <p class="label">Phone</p>
-        <a :href="`tel:${contractor.phone}`" class="phone">{{
-          contractor.phone
+        <a :href="`tel:${contractor?.contactDetails?.phone}`" class="phone">{{
+          contractor?.contactDetails?.phone
         }}</a>
       </div>
 
@@ -21,15 +21,15 @@
       <div class="location-info">
         <div class="info-row">
           <p class="label">City</p>
-          <h4 class="value">{{ contractor.city }}</h4>
+          <h4 class="value">{{ contractor.city || "-" }}</h4>
         </div>
         <div class="info-row">
           <p class="label">Location</p>
-          <p class="value">{{ contractor.location }}</p>
+          <p class="value">{{ contractor.location || "-" }}</p>
         </div>
         <div class="info-row">
           <p class="label">Pincode</p>
-          <h4 class="value">{{ contractor.pincode }}</h4>
+          <h4 class="value">{{ contractor.pinCode || "-" }}</h4>
         </div>
       </div>
 
@@ -37,7 +37,7 @@
       <div class="worker-section">
         <p class="label">Available Workers</p>
         <el-table
-          :data="contractor.workers"
+          :data="contractor.availableWorkers"
           border
           style="width: 100%"
           class="workers-table"
@@ -67,41 +67,45 @@
 </template>
 
 <script setup>
-import { useRoute } from "vue-router";
-import { ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { ref, onMounted, reactive } from "vue";
+import { ElNotification } from "element-plus";
+import { getContractorPostDetails } from "../api/contractor";
 
-// Mock contractor posts data (replace with API later)
-const contractorPosts = [
-  {
-    id: 1,
-    name: "Tony",
-    phone: "+917396547852",
-    city: "Hyderabad",
-    location: "Gachibowli, SBI Bank Road",
-    pincode: "500032",
-    status: "open",
-    workers: [
-      { type: "Mason", count: 26, status: "open" },
-      { type: "Helpers", count: 55, status: "open" },
-      { type: "Rod Benders", count: 8, status: "closed" },
-    ],
-  },
-  {
-    id: 2,
-    name: "Ramesh",
-    phone: "+919876543210",
-    city: "Hyderabad",
-    location: "Miyapur",
-    pincode: "500049",
-    status: "closed",
-    workers: [
-      { type: "Plumber", count: 10, status: "open" },
-      { type: "Electrician", count: 5, status: "closed" },
-    ],
-  },
-];
+const route = useRoute();
+const router = useRouter();
+const loading = ref(false);
 
 // const route = useRoute();
 // const contractorId = Number(route.params.id);
-const contractor = ref(contractorPosts.find((c, i) => c.id));
+const contractor = ref({});
+
+const id = route.params.id;
+
+async function fetchContractorPost(postId) {
+  loading.value = true;
+  try {
+    const resp = await getContractorPostDetails(postId);
+    if (resp.status === 200) {
+      let apiData = resp?.data ?? null;
+      contractor.value = apiData.data;
+    }
+  } catch (err) {
+    console.error("Failed to fetch contractor post, using fallback:", err);
+    ElNotification("warning", "Failed to fetch contractor post");
+    router.back();
+  } finally {
+    loading.value = false;
+  }
+}
+
+onMounted(() => {
+  // if no id, still render fallback
+  if (!id) {
+    ElNotification("warning", "Failed to fetch contractor post");
+    router.back();
+    return;
+  }
+  fetchContractorPost(id);
+});
 </script>

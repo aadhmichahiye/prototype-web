@@ -37,3 +37,26 @@ export function userRegister(data) {
     data,
   });
 }
+
+export function getUserProfile() {
+  return request({
+    url: "user/profile",
+    method: "get",
+  });
+}
+
+export function userProfileUpdate(data) {
+  return request({
+    url: "user/profile/update",
+    method: "put",
+    data,
+  });
+}
+
+export function userProfileUpdatePin(data) {
+  return request({
+    url: "user/profile/update/pin",
+    method: "post",
+    data,
+  });
+}

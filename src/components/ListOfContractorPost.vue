@@ -35,7 +35,7 @@
           type="primary"
           size="small"
           class="contact-btn"
-          @click="handleViewDetails"
+          @click="handleViewDetails(post)"
         >
           Contact Contractor
         </el-button>
@@ -155,7 +155,7 @@ function handleViewDetails(post) {
   } else {
     // fallback to contractor details by contractor id
     const contractorId = post.raw?.details;
-    if (contractorId) router.push(`/contractor/${contractorId}`);
+    if (contractorId) router.push(`/contractor-posts/${contractorId}`);
   }
 }
 

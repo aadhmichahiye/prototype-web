@@ -12,3 +12,11 @@ export function fetchContractorsApi(params) {
     params,
   });
 }
+
+
+export function getContractorPostDetails(id) {
+  return request({
+    url: `contractor-manpower-posts/${id}`,
+    method: "get",
+  });
+}
