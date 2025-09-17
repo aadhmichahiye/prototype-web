@@ -5,6 +5,13 @@ import request from "../utils/request";
  * params: { page, limit, q, city, pinCode, status }
  */
 
+export function createManpowerApi(data) {
+  return request({
+    url: `contractor-manpower-posts/create`,
+    method: "post",
+    data,
+  });
+}
 export function fetchContractorsApi(params) {
   return request({
     url: "contractor-manpower-posts/all",
@@ -13,17 +20,24 @@ export function fetchContractorsApi(params) {
   });
 }
 
-export function getContractorPostDetails(id) {
+export function deleteContractorPost(id) {
   return request({
-    url: `contractor-manpower-posts/${id}`,
-    method: "get",
+    url: `contractor-manpower-posts/delete/${id}`,
+    method: "delete",
   });
 }
 
-export function createManpowerApi(data) {
+export function fetchMyContractorPosts(params) {
   return request({
-    url: `contractor-manpower-posts/create`,
-    method: "post",
-    data,
+    url: `contractor-manpower-posts/my-posts`,
+    method: "get",
+    params,
+  });
+}
+
+export function getContractorPostDetails(id) {
+  return request({
+    url: `contractor-manpower-posts/details/${id}`,
+    method: "get",
   });
 }
