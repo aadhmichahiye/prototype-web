@@ -52,6 +52,12 @@ const routes = [
         props: true, // passes { id } as prop if you want
       },
       {
+        path: "/contractor-posts/:id",
+        name: "ContractorPostEdit",
+        component: ContractorPostsCreate,
+        props: true, // passes { id } as prop if you want
+      },
+      {
         path: "contractor-posts/create",
         component: ContractorPostsCreate,
         meta: { requiresAuth: true, roles: ["contractor"] },

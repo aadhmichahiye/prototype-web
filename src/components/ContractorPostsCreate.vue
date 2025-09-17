@@ -86,7 +86,7 @@
                 style="width: 100%"
               >
                 <el-option label="Mason" value="Mason" />
-                <el-option label="Helpers" value="Helpers" />
+                <el-option label="Helpers" value="Helper" />
                 <el-option label="Electrician" value="Electrician" />
                 <el-option label="Plumber" value="Plumber" />
                 <el-option label="Carpenter" value="Carpenter" />
@@ -127,8 +127,13 @@
 
       <!-- Submit -->
       <div class="form-footer">
-        <el-button type="primary" class="submit-btn" @click="submitForm">
-          Submit Contractor Post
+        <el-button
+          type="primary"
+          class="submit-btn"
+          :loading="submitting"
+          @click="submitForm"
+        >
+          {{ isEditMode ? "Update Contractor Post" : "Submit Contractor Post" }}
         </el-button>
       </div>
     </el-form>
@@ -136,14 +141,37 @@
 </template>
 
 <script setup>
-import { reactive, ref } from "vue";
-import { ElNotification } from "element-plus"; // add this import
-import { createManpowerApi } from "../api/contractor"; // your API helper (axios) - adjust path if needed
+/*
+  ContractorCreatePost.vue
+  - Supports Create (no route id) and Edit (route param id present).
+  - Do not change UI.
+  - Requires API helpers (adjust import paths/names if different in your project):
+      createManpowerApi(payload)      => POST /api/contractor-manpower-post (create)
+      getManpowerApi(id)              => GET  /api/contractor-manpower-post/:id
+      updateManpowerApi(id, payload)  => PUT  /api/contractor-manpower-post/:id
+*/
+
+import { reactive, ref, onMounted } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { ElNotification } from "element-plus";
+
+import {
+  createManpowerApi,
+  getManpowerApi,
+  updateManpowerApi,
+} from "../api/contractor"; // adjust path if needed
+
+const route = useRoute();
+const router = useRouter();
+const id = route.params.id || null;
+const isEditMode = !!id;
 
 const contractorFormRef = ref();
 const loading = ref(false);
+const submitting = ref(false);
 
 const contractorForm = reactive({
+  // fields mapping to UI
   name: "",
   city: "Hyderabad", // default
   location: "",
@@ -153,10 +181,32 @@ const contractorForm = reactive({
   availableWorkers: [{ type: "", count: 1 }],
 });
 
+// validation rules (kept minimal; keep as you had)
 const rules = {
-  /* ... keep your rules unchanged ... */
+  name: [{ required: true, message: "Name is required", trigger: "blur" }],
+  city: [{ required: true, message: "City is required", trigger: "change" }],
+  pinCode: [
+    { required: true, message: "Pincode is required", trigger: "blur" },
+    {
+      pattern: /^[0-9]{6}$/,
+      message: "Enter a valid 6-digit pincode",
+      trigger: "blur",
+    },
+  ],
+  location: [
+    { required: true, message: "Location is required", trigger: "blur" },
+  ],
+  phone: [
+    { required: true, message: "Phone number is required", trigger: "blur" },
+    {
+      pattern: /^[0-9]{10}$/,
+      message: "Enter valid 10-digit phone number",
+      trigger: "blur",
+    },
+  ],
 };
 
+/* Worker helpers */
 const addWorker = () => {
   contractorForm.availableWorkers.push({ type: "", count: 1 });
 };
@@ -165,10 +215,95 @@ const removeWorker = (index) => {
   contractorForm.availableWorkers.splice(index, 1);
 };
 
-let submitting = false;
+/* Map API payload -> form */
+function populateFormFromApi(data) {
+  if (!data) return;
+  contractorForm.name = data.name || data.title || "";
+  contractorForm.city = data.city
+    ? // normalize capitalization
+      data.city.charAt(0).toUpperCase() + data.city.slice(1)
+    : "Hyderabad";
+  contractorForm.location = data.location || "";
+  contractorForm.pinCode = data.pinCode || data.pincode || "";
+  // contactDetails.phone may be +91 prefixed; map to last 10 digits for input
+  const phoneRaw = data.contactDetails?.phone || data.phone || "";
+  contractorForm.phone = ("" + phoneRaw).replace(/\D/g, "").slice(-10);
 
+  contractorForm.status = data.status || "open";
+
+  // map availableWorkers -> keep type and count; preserve _id if present
+  contractorForm.availableWorkers =
+    Array.isArray(data.availableWorkers) && data.availableWorkers.length
+      ? data.availableWorkers.map((w) => ({
+          _id: w._id || undefined,
+          type: typeof w.type === "string" ? w.type : "",
+          count: w.count ?? 1,
+        }))
+      : [{ type: "", count: 1 }];
+}
+
+/* Build payload to send to backend */
+function buildPayloadFromForm() {
+  const payload = {
+    name: contractorForm.name?.trim() || undefined,
+    city: contractorForm.city?.trim().toLowerCase(),
+    location: contractorForm.location?.trim(),
+    pinCode: contractorForm.pinCode?.toString().trim(),
+    // backend expects nested contactDetails perhaps — many of your backend examples used contactDetails.phone
+    contactDetails: {
+      phone: contractorForm.phone ? `+91${contractorForm.phone}` : "",
+    },
+    status: contractorForm.status || "open",
+    // availableWorkers: array of { type, count }
+    availableWorkers: (contractorForm.availableWorkers || [])
+      .filter((w) => w && w.type)
+      .map((w) => ({
+        type: (w.type || "").toString().trim().toLowerCase(),
+        count: Number(w.count) || 0,
+      })),
+  };
+
+  // remove undefined keys
+  Object.keys(payload).forEach((k) => {
+    if (payload[k] === undefined || payload[k] === "") delete payload[k];
+  });
+
+  return payload;
+}
+
+/* Load existing data when editing */
+async function loadExistingPost(postId) {
+  loading.value = true;
+  try {
+    const res = await getManpowerApi(postId);
+    // expected shape: { message, data }
+    const apiData = res?.data?.data ? res.data.data : res?.data || null;
+    if (!apiData) {
+      throw new Error("No data returned from server");
+    }
+    populateFormFromApi(apiData);
+  } catch (err) {
+    console.error("Failed to load manpower post:", err);
+    ElNotification({
+      title: "Error",
+      message:
+        err?.response?.data?.message ||
+        err?.message ||
+        "Unable to load post for editing.",
+      type: "error",
+    });
+    // if edit id invalid, redirect back to list to avoid stale page
+    router.push("/contractor-posts/my-posts");
+  } finally {
+    loading.value = false;
+  }
+}
+
+/* Submit handler: create or update based on mode */
 const submitForm = async () => {
-  if (submitting) return;
+  if (submitting.value) return;
+  if (!contractorFormRef.value) return;
+
   contractorFormRef.value.validate(async (valid) => {
     if (!valid) {
       ElNotification({
@@ -176,12 +311,10 @@ const submitForm = async () => {
         message: "Please fix the errors in the form.",
         type: "warning",
       });
-      loading.value = false;
       return false;
     }
 
-    loading.value = true;
-    // Basic client-side safety checks before sending
+    // Basic client-side workers validation
     if (
       !Array.isArray(contractorForm.availableWorkers) ||
       contractorForm.availableWorkers.length === 0
@@ -191,21 +324,18 @@ const submitForm = async () => {
         message: "Please add at least one worker.",
         type: "warning",
       });
-      loading.value = false;
       return false;
     }
 
-    // normalize workers payload: ensure type is string and count is integer
     const workersPayload = contractorForm.availableWorkers.map((w, idx) => {
       return {
-        type: (w.type || "").toString().trim().toLocaleLowerCase(),
+        type: (w.type || "").toString().trim().toLowerCase(),
         count: Number.isFinite(Number(w.count))
           ? Math.floor(Number(w.count))
           : 0,
       };
     });
 
-    // re-validate worker entries
     for (const [i, w] of workersPayload.entries()) {
       if (!w.type) {
         ElNotification({
@@ -213,7 +343,6 @@ const submitForm = async () => {
           message: `Worker #${i + 1} type is required`,
           type: "warning",
         });
-        loading.value = false;
         return false;
       }
       if (!w.count || w.count <= 0) {
@@ -222,58 +351,76 @@ const submitForm = async () => {
           message: `Worker #${i + 1} count must be > 0`,
           type: "warning",
         });
-        loading.value = false;
         return false;
       }
     }
 
-    // Build payload matching backend expectations:
-    // { name, city, location, pincode, phone, status, workers: [...] }
-    const payload = {
-      name: contractorForm.name?.trim() || undefined,
-      city: contractorForm.city?.trim().toLocaleLowerCase(),
-      location: contractorForm.location?.trim(),
-      pinCode: contractorForm.pinCode?.toString().trim(),
-      phone: contractorForm.phone?.toString().trim(),
-      status: contractorForm.status || "open",
-      availableWorkers: workersPayload,
-    };
+    const payload = buildPayloadFromForm();
 
+    submitting.value = true;
     try {
-      submitting = true;
-      // call API helper - adjust function name/path if your project uses a different export
-      const res = await createManpowerApi(payload);
-      // expecting axios-like response with res.data
-      if (res && (res.status === 200 || res.status === 201)) {
-        ElNotification({
-          title: "Success",
-          message: "Manpower post created successfully",
-          type: "success",
-        });
-        // optional: reset form or navigate — keep minimal as requested
-        // reset:
-        contractorForm.name = "";
-        contractorForm.city = "Hyderabad";
-        contractorForm.location = "";
-        contractorForm.pinCode = "";
-        contractorForm.phone = "";
-        contractorForm.status = "open";
-        contractorForm.availableWorkers = [{ type: "", count: 1 }];
+      if (isEditMode) {
+        // Update existing post
+        const res = await updateManpowerApi(id, payload);
+        if (res && (res.status === 200 || res.status === 201)) {
+          ElNotification({
+            title: "Success",
+            message: "Manpower post updated successfully",
+            type: "success",
+          });
+          // redirect to list or details page
+          router.push("/contractor-posts/my-posts");
+        } else {
+          ElNotification({
+            title: "Error",
+            message: res?.data?.message || "Failed to update manpower post",
+            type: "error",
+          });
+        }
       } else {
-        ElNotification({
-          title: "Error",
-          message: res?.data?.message || "Failed to create manpower post",
-          type: "error",
-        });
+        // Create new post
+        const res = await createManpowerApi(payload);
+        if (res && (res.status === 200 || res.status === 201)) {
+          ElNotification({
+            title: "Success",
+            message: "Manpower post created successfully",
+            type: "success",
+          });
+          // reset form
+          contractorForm.name = "";
+          contractorForm.city = "Hyderabad";
+          contractorForm.location = "";
+          contractorForm.pinCode = "";
+          contractorForm.phone = "";
+          contractorForm.status = "open";
+          contractorForm.availableWorkers = [{ type: "", count: 1 }];
+          // optionally redirect to list
+          router.push("/contractor-posts/my-posts");
+        } else {
+          ElNotification({
+            title: "Error",
+            message: res?.data?.message || "Failed to create manpower post",
+            type: "error",
+          });
+        }
       }
     } catch (err) {
-      console.error("Error creating manpower post:", err);
-      const msg = err?.response?.data?.message || err.message || "Server error";
+      console.error("Submit error:", err);
+      const msg =
+        err?.response?.data?.message || err?.message || "Server error";
       ElNotification({ title: "Error", message: msg, type: "error" });
     } finally {
-      submitting = false;
-      loading.value = false;
+      submitting.value = false;
     }
   });
 };
+
+/* On mount: if edit mode, fetch data and populate */
+onMounted(() => {
+  if (isEditMode) {
+    loadExistingPost(id);
+  }
+});
 </script>
+
+<!-- no style block here — keep styling in your SCSS files as requested -->

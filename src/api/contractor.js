@@ -22,7 +22,7 @@ export function fetchContractorsApi(params) {
 
 export function deleteContractorPost(id) {
   return request({
-    url: `contractor-manpower-posts/delete/${id}`,
+    url: `contractor-manpower-posts/my-posts/delete/${id}`,
     method: "delete",
   });
 }
@@ -39,5 +39,20 @@ export function getContractorPostDetails(id) {
   return request({
     url: `contractor-manpower-posts/details/${id}`,
     method: "get",
+  });
+}
+
+export function getManpowerApi(id) {
+  return request({
+    url: `contractor-manpower-posts/my-posts/${id}`,
+    method: "get",
+  });
+}
+
+export function updateManpowerApi(id, data) {
+  return request({
+    url: `contractor-manpower-posts/my-posts/update/${id}`,
+    method: "patch",
+    data,
   });
 }

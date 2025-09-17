@@ -46,3 +46,11 @@ export function updateClientPost(id, data) {
     data,
   });
 }
+
+export function fetchClientPostsForContractors(params) {
+  return request({
+    url: "client-job-posts/all",
+    method: "get",
+    params,
+  });
+}
