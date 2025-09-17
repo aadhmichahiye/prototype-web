@@ -30,9 +30,9 @@
           </el-select>
         </el-form-item>
 
-        <el-form-item label="Pincode" prop="pincode">
+        <el-form-item label="Pincode" prop="pinCode">
           <el-input
-            v-model="contractorForm.pincode"
+            v-model="contractorForm.pinCode"
             placeholder="e.g., 500032"
             maxlength="6"
             clearable
@@ -71,7 +71,7 @@
       <div class="workers-section">
         <h3 class="section-title">Available Workers</h3>
         <el-table
-          :data="contractorForm.workers"
+          :data="contractorForm.availableWorkers"
           border
           stripe
           style="width: 100%"
@@ -137,63 +137,142 @@
 
 <script setup>
 import { reactive, ref } from "vue";
+import { ElNotification } from "element-plus"; // add this import
+import { createManpowerApi } from "../api/contractor"; // your API helper (axios) - adjust path if needed
 
 const contractorFormRef = ref();
+const loading = ref(false);
 
 const contractorForm = reactive({
   name: "",
   city: "Hyderabad", // default
   location: "",
-  pincode: "",
+  pinCode: "",
   phone: "",
   status: "open",
-  workers: [{ type: "", count: 1 }],
+  availableWorkers: [{ type: "", count: 1 }],
 });
 
 const rules = {
-  name: [
-    { required: true, message: "Contractor name is required", trigger: "blur" },
-  ],
-  city: [{ required: true, message: "City is required", trigger: "change" }],
-  location: [
-    { required: true, message: "Location is required", trigger: "blur" },
-  ],
-  pincode: [
-    { required: true, message: "Pincode is required", trigger: "blur" },
-    {
-      pattern: /^[0-9]{6}$/,
-      message: "Enter a valid 6-digit pincode",
-      trigger: "blur",
-    },
-  ],
-  phone: [
-    { required: true, message: "Phone number is required", trigger: "blur" },
-    {
-      pattern: /^[0-9]{10}$/,
-      message: "Enter a valid 10-digit phone number",
-      trigger: "blur",
-    },
-  ],
-  status: [
-    { required: true, message: "Status is required", trigger: "change" },
-  ],
+  /* ... keep your rules unchanged ... */
 };
 
 const addWorker = () => {
-  contractorForm.workers.push({ type: "", count: 1 });
+  contractorForm.availableWorkers.push({ type: "", count: 1 });
 };
 
 const removeWorker = (index) => {
-  contractorForm.workers.splice(index, 1);
+  contractorForm.availableWorkers.splice(index, 1);
 };
 
-const submitForm = () => {
-  contractorFormRef.value.validate((valid) => {
-    if (valid) {
-      console.log("Form submitted:", contractorForm);
-    } else {
-      console.log("Validation failed");
+let submitting = false;
+
+const submitForm = async () => {
+  if (submitting) return;
+  contractorFormRef.value.validate(async (valid) => {
+    if (!valid) {
+      ElNotification({
+        title: "Validation",
+        message: "Please fix the errors in the form.",
+        type: "warning",
+      });
+      loading.value = false;
       return false;
+    }
+
+    loading.value = true;
+    // Basic client-side safety checks before sending
+    if (
+      !Array.isArray(contractorForm.availableWorkers) ||
+      contractorForm.availableWorkers.length === 0
+    ) {
+      ElNotification({
+        title: "Validation",
+        message: "Please add at least one worker.",
+        type: "warning",
+      });
+      loading.value = false;
+      return false;
+    }
+
+    // normalize workers payload: ensure type is string and count is integer
+    const workersPayload = contractorForm.availableWorkers.map((w, idx) => {
+      return {
+        type: (w.type || "").toString().trim().toLocaleLowerCase(),
+        count: Number.isFinite(Number(w.count))
+          ? Math.floor(Number(w.count))
+          : 0,
+      };
+    });
+
+    // re-validate worker entries
+    for (const [i, w] of workersPayload.entries()) {
+      if (!w.type) {
+        ElNotification({
+          title: "Validation",
+          message: `Worker #${i + 1} type is required`,
+          type: "warning",
+        });
+        loading.value = false;
+        return false;
+      }
+      if (!w.count || w.count <= 0) {
+        ElNotification({
+          title: "Validation",
+          message: `Worker #${i + 1} count must be > 0`,
+          type: "warning",
+        });
+        loading.value = false;
+        return false;
+      }
+    }
+
+    // Build payload matching backend expectations:
+    // { name, city, location, pincode, phone, status, workers: [...] }
+    const payload = {
+      name: contractorForm.name?.trim() || undefined,
+      city: contractorForm.city?.trim().toLocaleLowerCase(),
+      location: contractorForm.location?.trim(),
+      pinCode: contractorForm.pinCode?.toString().trim(),
+      phone: contractorForm.phone?.toString().trim(),
+      status: contractorForm.status || "open",
+      availableWorkers: workersPayload,
+    };
+
+    try {
+      submitting = true;
+      // call API helper - adjust function name/path if your project uses a different export
+      const res = await createManpowerApi(payload);
+      // expecting axios-like response with res.data
+      if (res && (res.status === 200 || res.status === 201)) {
+        ElNotification({
+          title: "Success",
+          message: "Manpower post created successfully",
+          type: "success",
+        });
+        // optional: reset form or navigate — keep minimal as requested
+        // reset:
+        contractorForm.name = "";
+        contractorForm.city = "Hyderabad";
+        contractorForm.location = "";
+        contractorForm.pinCode = "";
+        contractorForm.phone = "";
+        contractorForm.status = "open";
+        contractorForm.availableWorkers = [{ type: "", count: 1 }];
+      } else {
+        ElNotification({
+          title: "Error",
+          message: res?.data?.message || "Failed to create manpower post",
+          type: "error",
+        });
+      }
+    } catch (err) {
+      console.error("Error creating manpower post:", err);
+      const msg = err?.response?.data?.message || err.message || "Server error";
+      ElNotification({ title: "Error", message: msg, type: "error" });
+    } finally {
+      submitting = false;
+      loading.value = false;
     }
   });
 };

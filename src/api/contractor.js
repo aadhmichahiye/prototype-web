@@ -13,10 +13,17 @@ export function fetchContractorsApi(params) {
   });
 }
 
-
 export function getContractorPostDetails(id) {
   return request({
     url: `contractor-manpower-posts/${id}`,
     method: "get",
+  });
+}
+
+export function createManpowerApi(data) {
+  return request({
+    url: `contractor-manpower-posts/create`,
+    method: "post",
+    data,
   });
 }

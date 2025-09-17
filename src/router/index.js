@@ -12,6 +12,7 @@ import ContractorPostsDetails from "../components/ContractorPostsDetails.vue";
 import TermsAndConditions from "../views/TermsAndConditions.vue";
 import ClientMyPosts from "../components/ClientMyPosts.vue";
 import Home from "../views/Home.vue";
+import ContractorMyPosts from "../components/ContractorMyPosts.vue";
 const routes = [
   //   { path: "/login", component: Login }, // auth without sidebar
   {
@@ -70,6 +71,11 @@ const routes = [
         path: "client-posts/my-posts",
         component: ClientMyPosts,
         meta: { requiresAuth: true, roles: ["client"] },
+      },
+      {
+        path: "contractor-posts/my-posts",
+        component: ContractorMyPosts,
+        meta: { requiresAuth: true, roles: ["contractor"] },
       },
       {
         path: "client-posts/details/:id",

@@ -1,6 +1,6 @@
 <template>
   <div class="contractor-post-detail" v-if="contractor">
-    <div class="contractor-card">
+    <div class="contractor-card" v-loading="loading">
       <!-- Header -->
       <div class="card-header">
         <h2 class="contractor-name">{{ contractor.name || "-" }}</h2>
