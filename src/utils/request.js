@@ -2,6 +2,7 @@
 import axios from "axios";
 import { getToken } from "./auth";
 import { useUserStore } from "../stores/userStore";
+import router from "../router";
 
 /**
  * Axios instance
@@ -106,7 +107,7 @@ request.interceptors.response.use(
         // Refresh failed: reject queued requests and clear auth
         processQueue(refreshError, null);
         isRefreshing = false;
-
+        router.push("/login");
         // Optionally: clear tokens & redirect to login within store's refreshAccessToken
         // (we expect store.refreshAccessToken to clear auth on failure)
         return Promise.reject(refreshError);
