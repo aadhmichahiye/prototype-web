@@ -59,6 +59,7 @@ const routes = [
       },
       {
         path: "contractor-posts/create",
+        name: "ContractorPostCreate",
         component: ContractorPostsCreate,
         meta: { requiresAuth: true, roles: ["contractor"] },
       },

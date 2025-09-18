@@ -27,13 +27,13 @@
 
         <!-- Description -->
         <el-form-item label="Description" prop="description">
-         <el-input
-  type="textarea"
-  v-model="jobForm.description"
-  placeholder="e.g., Need 10 masons and 20 helpers for construction site"
-  :rows="3"
-  clearable
-/>
+          <el-input
+            type="textarea"
+            v-model="jobForm.description"
+            placeholder="e.g., Need 10 masons and 20 helpers for construction site"
+            :rows="3"
+            clearable
+          />
         </el-form-item>
 
         <!-- City & Pincode -->
@@ -267,9 +267,32 @@ function buildPayload() {
   };
 }
 
-watch(isEditMode, () => {
-  console.log("watch method");
-});
+watch(
+  () => route.fullPath,
+  (newPath, oldPath) => {
+    // Case: navigated to create page
+    if (newPath.endsWith("/create")) {
+      console.log("Switched to create mode");
+      jobForm.title = "";
+      jobForm.description = "";
+      jobForm.city = "Hyderabad";
+      jobForm.pincode = "";
+      jobForm.address = "";
+      jobForm.phone = "";
+      jobForm.workers = [{ type: "", count: 1 }];
+      // resetForm(); // <-- your existing resetForm function
+      isEditMode.value = false;
+    }
+
+    // Case: navigated to edit page with id
+    else if (route.params.id) {
+      console.log("Switched to edit mode, id:", route.params.id);
+      // loadExistingPost(route.params.id); // <-- your existing loader
+      isEditMode.value = true;
+    }
+  },
+  { immediate: true } // run once on mount as well
+);
 
 // on component mount: if edit mode fetch existing post
 onMounted(async () => {
@@ -280,6 +303,7 @@ onMounted(async () => {
   }
 
   if (id) {
+    console.log("fetching post for edit:", id);
     loading.value = true;
     try {
       const resp = await getClientPost(id);
@@ -360,7 +384,7 @@ const submitForm = async () => {
 
     saving.value = true;
     try {
-      if (id) {
+      if (id && isEditMode.value) {
         // update
         const res = await updateClientPost(id, payload);
         if (res?.status === 200 || res?.status === 204 || res?.status === 201) {
