@@ -27,13 +27,13 @@
 
         <!-- Description -->
         <el-form-item label="Description" prop="description">
-          <el-input
-            type="textarea"
-            v-model="jobForm.description"
-            placeholder="e.g., Need 10 masons and 20 helpers for construction site"
-            rows="3"
-            clearable
-          />
+         <el-input
+  type="textarea"
+  v-model="jobForm.description"
+  placeholder="e.g., Need 10 masons and 20 helpers for construction site"
+  :rows="3"
+  clearable
+/>
         </el-form-item>
 
         <!-- City & Pincode -->
@@ -152,7 +152,7 @@
             {{ isEditMode ? "Update Job" : "Submit Job" }}
           </el-button>
 
-          <el-button @click="cancel" class="cancel-btn">Cancel</el-button>
+          <!-- <el-button @click="cancel" class="cancel-btn">Cancel</el-button> -->
         </div>
       </el-form>
     </div>
@@ -174,7 +174,7 @@
  * Adjust import paths if your project uses different paths.
  */
 
-import { ref, reactive, onMounted } from "vue";
+import { ref, reactive, onMounted, watch, nextTick } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { ElNotification } from "element-plus";
 import {
@@ -190,9 +190,9 @@ const jobFormRef = ref(null);
 const loading = ref(false); // initial page fetch loading
 const saving = ref(false); // submit loading
 
-// detect edit mode
 const id = route.params?.id || null;
-const isEditMode = !!id && route.name !== "ClientPostCreate"; // fallback, but we'll rely on presence of id
+// make reactive so template updates when route changes
+const isEditMode = ref(!!id && route.name !== "ClientPostCreate");
 
 // default model
 const jobForm = reactive({
@@ -266,6 +266,10 @@ function buildPayload() {
     },
   };
 }
+
+watch(isEditMode, () => {
+  console.log("watch method");
+});
 
 // on component mount: if edit mode fetch existing post
 onMounted(async () => {

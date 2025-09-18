@@ -1,7 +1,7 @@
 <template>
   <div class="client-post-detail">
     <!-- Job Card -->
-    <div class="client-card">
+    <div class="client-card" v-if="!loading">
       <!-- Header -->
       <div class="card-header">
         <div>
@@ -55,29 +55,144 @@
 
       <!-- Footer -->
       <div class="footer">
-        <el-button type="primary" class="contact-btn">
+        <el-button
+          v-if="post.contactPhone"
+          type="primary"
+          class="contact-btn"
+          @click="callClient"
+        >
           Contact Client
         </el-button>
       </div>
+    </div>
+
+    <div
+      v-if="loading"
+      class="loading-state"
+      style="padding: 2rem; text-align: center"
+    >
+      <el-skeleton :rows="6" animated />
+    </div>
+
+    <div
+      v-if="!loading && error"
+      class="error-state"
+      style="padding: 2rem; text-align: center"
+    >
+      <p style="color: #b91c1c">{{ error }}</p>
+      <el-button type="primary" @click="goBack">Back to My Posts</el-button>
     </div>
   </div>
 </template>
 
 <script setup>
-import { useRoute } from "vue-router";
+import { ref, onMounted } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { ElNotification } from "element-plus";
+import { getClientPostDetails } from "../api/client"; // ensure this exists and returns axios-like response
+
 const route = useRoute();
+const router = useRouter();
+
 const postId = route.params.id;
-const post = {
-  id: 1,
-  title: "Mason Requirement",
-  description: "Need 10 masons and 20 helpers for construction site.",
-  city: "Hyderabad",
-  address: "Gachibowli, Near SBI Bank Road",
-  pincode: "500032",
-  status: "open",
-  workers: [
-    { type: "Mason", count: 10 },
-    { type: "Helpers", count: 20 },
-  ],
-};
+const loading = ref(false);
+const error = ref(null);
+
+const post = ref({
+  title: "",
+  description: "",
+  city: "",
+  address: "",
+  pincode: "",
+  status: "",
+  workers: [],
+  contactPhone: "",
+});
+
+// helper to map backend response -> post structure
+function mapApiToPost(apiData) {
+  if (!apiData) return;
+
+  const workers = Array.isArray(apiData.requiredWorkers)
+    ? apiData.requiredWorkers.map((w) => ({
+        type: w.type || "",
+        count: w.count || 0,
+      }))
+    : [];
+
+  return {
+    title: apiData.title || "",
+    description: apiData.description || "",
+    city: apiData.city || "",
+    address: apiData.location || apiData.address || "",
+    pincode: apiData.pinCode || apiData.pincode || "",
+    status: apiData.status || "",
+    workers,
+    contactPhone: apiData.contactDetails?.phone || "",
+    raw: apiData,
+  };
+}
+
+async function loadPost(id) {
+  if (!id) {
+    error.value = "Invalid post id";
+    ElNotification({
+      title: "Error",
+      message: "Invalid post id",
+      type: "error",
+    });
+    // redirect after short delay to give user feedback
+    setTimeout(() => router.push("/client-posts/my-posts"), 700);
+    return;
+  }
+
+  loading.value = true;
+  error.value = null;
+
+  try {
+    // expected axios-like: res.data = { message, data }
+    const res = await getClientPostDetails(id);
+    const payload = res?.data || {};
+    const apiData = payload.data || payload; // support helpers that return raw data
+
+    if (!apiData) {
+      error.value = "Post not found";
+      ElNotification({
+        title: "Error",
+        message: "Post not found",
+        type: "error",
+      });
+      setTimeout(() => router.push("/client-posts/my-posts"), 700);
+      return;
+    }
+
+    const mapped = mapApiToPost(apiData);
+    post.value = mapped;
+  } catch (err) {
+    console.error("Failed to fetch client post details:", err);
+    const msg =
+      err?.response?.data?.message ||
+      err?.message ||
+      "Failed to load post details";
+    error.value = msg;
+    ElNotification({ title: "Error", message: msg, type: "error" });
+    // optionally redirect user back to my-posts after showing error
+    router.push("/client-posts/list");
+  } finally {
+    loading.value = false;
+  }
+}
+
+function callClient() {
+  if (!post.value.contactPhone) return;
+  window.location.href = `tel:${post.value.contactPhone}`;
+}
+
+function goBack() {
+  router.back();
+}
+
+onMounted(() => {
+  loadPost(postId);
+});
 </script>

@@ -151,7 +151,7 @@
       updateManpowerApi(id, payload)  => PUT  /api/contractor-manpower-post/:id
 */
 
-import { reactive, ref, onMounted } from "vue";
+import { reactive, ref, onMounted, watch, nextTick } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { ElNotification } from "element-plus";
 
@@ -205,6 +205,23 @@ const rules = {
     },
   ],
 };
+
+function resetForm() {
+  // reset reactive fields
+  contractorForm.name = "";
+  contractorForm.city = "Hyderabad";
+  contractorForm.location = "";
+  contractorForm.pinCode = "";
+  contractorForm.phone = "";
+  contractorForm.status = "open";
+  contractorForm.availableWorkers = [{ type: "", count: 1 }];
+
+  // reset Element Plus validations and touched state (if using el-form)
+  if (contractorFormRef?.value?.resetFields) {
+    // nextTick to ensure DOM bindings are stable
+    nextTick(() => contractorFormRef.value.resetFields());
+  }
+}
 
 /* Worker helpers */
 const addWorker = () => {
@@ -414,6 +431,41 @@ const submitForm = async () => {
     }
   });
 };
+
+watch(
+  () => [route.fullPath, route.params.id],
+  ([_full, newId], [_oldFull, oldId]) => {
+    const hadId = !!oldId;
+    const hasId = !!newId;
+
+    // If we're moving from edit (hadId) -> create (no id) => reset form
+    if (hadId && !hasId) {
+      resetForm();
+      // ensure any edit-mode flags are updated
+      // if you store isEditMode as local const you may need to make it ref/updated; otherwise rely on route.params.id
+      return;
+    }
+
+    // If we moved from create (no id) -> edit (hasId) => load the new data
+    if (!hadId && hasId) {
+      // Load new data for this id
+      loadExistingPost(newId);
+      return;
+    }
+
+    // If id changed (edit -> edit with different id) => load new id
+    if (hadId && hasId && oldId !== newId) {
+      loadExistingPost(newId);
+      return;
+    }
+
+    // If fullPath changed but id stays same, you may want to still reset if path endsWith('/create')
+    if (!hasId && route.path.endsWith("/create")) {
+      resetForm();
+    }
+  },
+  { immediate: false }
+);
 
 /* On mount: if edit mode, fetch data and populate */
 onMounted(() => {

@@ -93,7 +93,7 @@
             type="button"
           >
             <button class="nav-item" type="button">
-              <i class="ri-add-circle-line nav-icon"></i>
+              <i class="ri-briefcase-5-fill nav-icon"></i>
               <span class="nav-label">My Posts</span>
             </button>
           </router-link>
@@ -118,7 +118,7 @@
             type="button"
           >
             <button class="nav-item" type="button">
-              <i class="ri-add-circle-line nav-icon"></i>
+              <i class="ri-briefcase-5-fill nav-icon"></i>
               <span class="nav-label">My Posts</span>
             </button>
           </router-link>

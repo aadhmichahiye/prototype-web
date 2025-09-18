@@ -1,5 +1,5 @@
 <template>
-  <SearchBar />
+  <SearchBar @search="updateSearch" />
   <div class="contractor-post-list">
     <div
       v-for="post in contractorPosts"
@@ -41,6 +41,13 @@
         </el-button>
       </div>
     </div>
+
+    <!-- optional load more area if needed by UI -->
+    <div v-if="hasMore" style="text-align: center; margin-top: 1rem">
+      <el-button type="primary" @click="loadMore" :loading="loading">
+        Load more
+      </el-button>
+    </div>
   </div>
 </template>
 
@@ -59,6 +66,8 @@ const error = ref(null);
 const page = ref(1);
 const limit = ref(10); // change if you want different page size
 const hasMore = ref(true);
+
+const searchQuery = ref(""); // current search text
 
 // --- map one manpower-post item from backend into your card shape ---
 // backend item shape expected:
@@ -93,7 +102,13 @@ function mapPostToCard(post) {
   };
 }
 
-// fetch manpower-posts page
+/**
+ * Fetch manpower-posts (paged)
+ * - opts.q overrides searchQuery for this call
+ * - opts.reset = true will reset posts + page counter
+ *
+ * Important: only increment page for subsequent pagination, not for search/reset.
+ */
 async function fetchContractors({ q = "", reset = false } = {}) {
   if (loading.value) return;
   loading.value = true;
@@ -106,17 +121,23 @@ async function fetchContractors({ q = "", reset = false } = {}) {
       hasMore.value = true;
     }
 
+    // choose effective query: explicit q wins; otherwise use searchQuery if present
+    const effectiveQ =
+      typeof q === "string" && q.length > 0
+        ? q
+        : searchQuery.value || undefined;
+
     const params = {
       page: page.value,
       limit: limit.value,
     };
-    if (q) params.search = q;
+    if (effectiveQ) params.search = effectiveQ;
 
     const res = await fetchContractorsApi(params);
     // expected res.data = { message, meta, data }
-    const payload = res.data;
+    const payload = res.data || {};
     const posts = payload?.data || [];
-    const meta = payload?.meta || { page: 1, pages: 1 };
+    const meta = payload?.meta || { page: page.value, pages: 1 };
 
     // map and append
     const mapped = posts.map(mapPostToCard);
@@ -128,10 +149,12 @@ async function fetchContractors({ q = "", reset = false } = {}) {
     }
 
     // determine if more pages exist
-    hasMore.value = (meta.page || page.value) < (meta.pages || 1);
+    const currentPage = meta.page || page.value;
+    const pages = meta.pages || 1;
+    hasMore.value = currentPage < pages;
 
-    // increment page for next call
-    page.value = (meta.page || page.value) + 1;
+    // increment page for next call (only for pagination)
+    page.value = currentPage + 1;
   } catch (err) {
     console.error("Error fetching manpower posts:", err);
     error.value =
@@ -141,7 +164,17 @@ async function fetchContractors({ q = "", reset = false } = {}) {
   }
 }
 
-// call on mount
+/* ---------- SEARCH HANDLER ---------- */
+/**
+ * Called by SearchBar @search
+ * Always reset page & items to avoid treating search change as "load more".
+ */
+function updateSearch(value) {
+  searchQuery.value = value || "";
+  fetchContractors({ q: searchQuery.value, reset: true });
+}
+
+// call on mount - initial load (reset true)
 onMounted(() => {
   fetchContractors({ reset: true });
 });

@@ -54,3 +54,10 @@ export function fetchClientPostsForContractors(params) {
     params,
   });
 }
+
+export function getClientPostDetails(id) {
+  return request({
+    url: `client-job-posts/details/${id}`,
+    method: "get",
+  });
+}

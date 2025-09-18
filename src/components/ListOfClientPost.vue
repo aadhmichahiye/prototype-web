@@ -1,5 +1,5 @@
 <template>
-  <SearchBar />
+  <SearchBar @search="updateSearch" />
   <div class="client-post-list">
     <div v-for="post in posts" :key="post.id" class="client-post-card">
       <div class="card-header">
@@ -49,7 +49,7 @@
 <script setup>
 /*
   Client posts list logic — mirrored from your contractor-list reference.
-  - Uses fetchClientPostsApi(params) from ../api/client (axios-like returning { data: { message, meta, data } })
+  - Uses fetchClientPostsForContractors(params) from ../api/client (axios-like returning { data: { message, meta, data } })
   - Maps backend shape to the template shape (id, title, description, address, city, pincode, workers[], status)
   - Pagination + load more
   - No template or styling changes
@@ -69,6 +69,7 @@ const error = ref(null);
 const page = ref(1);
 const limit = ref(10);
 const hasMore = ref(true);
+const searchQuery = ref("");
 
 /**
  * Map backend client-post item to the card shape used by the template
@@ -98,9 +99,22 @@ function mapPostToCard(post) {
   };
 }
 
+/* ---------- SEARCH / RESET ---------- */
+/**
+ * Called by SearchBar @search
+ * Always reset page & items to avoid treating search change as "load more".
+ */
+const updateSearch = (value) => {
+  // update local search query
+  searchQuery.value = value || "";
+  // reset and fetch page 1 with new query
+  fetchClientPosts({ q: searchQuery.value, reset: true });
+};
+
 /**
  * Fetch client posts (paged)
- * @param {Object} opts - { q, reset }
+ * - opts.q overrides searchQuery for this call
+ * - opts.reset = true will reset posts + page counter
  */
 async function fetchClientPosts({ q = "", reset = false } = {}) {
   if (loading.value) return;
@@ -114,17 +128,23 @@ async function fetchClientPosts({ q = "", reset = false } = {}) {
       hasMore.value = true;
     }
 
+    // determine which query to use: explicit q takes precedence else use searchQuery
+    const effectiveQ =
+      typeof q === "string" && q.length > 0
+        ? q
+        : searchQuery.value || undefined;
+
     const params = {
       page: page.value,
       limit: limit.value,
     };
-    if (q) params.search = q;
+    if (effectiveQ) params.search = effectiveQ;
 
     const res = await fetchClientPostsForContractors(params);
     // expected res.data = { message, meta, data }
     const payload = res.data || {};
     const items = payload.data || [];
-    const meta = payload.meta || { page: 1, pages: 1 };
+    const meta = payload.meta || { page: page.value, pages: 1 };
 
     const mapped = items.map(mapPostToCard);
 
@@ -132,10 +152,12 @@ async function fetchClientPosts({ q = "", reset = false } = {}) {
     else posts.value.push(...mapped);
 
     // determine if more pages exist
-    hasMore.value = (meta.page || page.value) < (meta.pages || 1);
+    const currentPage = meta.page || page.value;
+    const pages = meta.pages || 1;
+    hasMore.value = currentPage < pages;
 
-    // increment page for next call
-    page.value = (meta.page || page.value) + 1;
+    // increment page for next call only (so subsequent fetchClientPosts() without reset uses next page)
+    page.value = currentPage + 1;
   } catch (err) {
     console.error("Error fetching client posts:", err);
     error.value =
@@ -145,7 +167,7 @@ async function fetchClientPosts({ q = "", reset = false } = {}) {
   }
 }
 
-// initial load
+// initial load — ensure reset true so page starts at 1
 onMounted(() => {
   fetchClientPosts({ reset: true });
 });
@@ -158,9 +180,10 @@ function handleViewDetails(post) {
   }
 }
 
-// load more
+// load more (pagination) — increments page internally
 function loadMore() {
   if (loading.value || !hasMore.value) return;
+  // call without reset to append next page
   fetchClientPosts();
 }
 </script>
