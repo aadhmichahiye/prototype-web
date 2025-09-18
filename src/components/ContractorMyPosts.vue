@@ -323,11 +323,12 @@ watch(
 );
 </script>
 
-<style scoped>
+<!-- <style scoped>
 /* minimal local tweaks — move to your scss files if you want */
 .client-visits-posts {
   min-height: 100vh;
   padding: 1.2rem;
+  margin-top: 500px;
 }
 .layout {
   display: flex;
@@ -417,4 +418,4 @@ watch(
   align-items: center;
   justify-content: center;
 }
-</style>
+</style> -->

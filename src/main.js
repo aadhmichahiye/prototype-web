@@ -22,4 +22,13 @@ const user = useUserStore();
 user.pageLoadedORRefreshed(); // restores token and starts timer if token exists
 // Mount app
 router.beforeEach(authGuard);
+router.beforeEach((to, from, next) => {
+  // Update title from meta
+  if (to.meta?.title) {
+    document.title = to.meta.title;
+  } else {
+    document.title = "aadhmichahiye"; // default fallback
+  }
+  next();
+});
 app.mount("#app");
